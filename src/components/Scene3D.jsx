@@ -1,4 +1,5 @@
 import { Canvas } from '@react-three/fiber'
+import { OrbitControls } from '@react-three/drei'
 
 function Scene3D({ children }) {
   return (
@@ -16,6 +17,17 @@ function Scene3D({ children }) {
       <directionalLight
         position={[5, 5, 5]}
         intensity={1}
+      />
+
+      {/* OrbitControls for camera manipulation */}
+      <OrbitControls
+        enablePan={true}
+        enableZoom={true}
+        enableRotate={true}
+        minDistance={3}
+        maxDistance={20}
+        enableDamping={true}
+        dampingFactor={0.05}
       />
 
       {/* Temporary test sphere - will be removed */}
