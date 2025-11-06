@@ -1,5 +1,6 @@
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
+import HeartMesh from './HeartMesh'
 
 function Scene3D({ children }) {
   return (
@@ -30,11 +31,8 @@ function Scene3D({ children }) {
         dampingFactor={0.05}
       />
 
-      {/* Temporary test sphere - will be removed */}
-      <mesh>
-        <sphereGeometry args={[1, 32, 32]} />
-        <meshStandardMaterial color="#ff6b6b" />
-      </mesh>
+      {/* Heart mesh - stylized icosahedron */}
+      <HeartMesh />
 
       {/* Scene content */}
       {children}
