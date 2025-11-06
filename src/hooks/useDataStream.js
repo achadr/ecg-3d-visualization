@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback, useRef } from 'react'
  * Custom hook to simulate real-time data streaming
  * Manages streaming state, data accumulation, and cleanup
  *
+ * Written using TDD approach - tests written first
+ *
  * @param {Function} dataGenerator - Function that generates data points
  * @param {number} interval - Interval in ms between data generations (default: 100ms)
  * @param {number} maxPoints - Maximum number of points to keep in memory (default: 1000)
@@ -15,11 +17,18 @@ function useDataStream(dataGenerator, interval = 100, maxPoints = 1000) {
   const intervalRef = useRef(null)
   const frameCountRef = useRef(0)
 
+  const stopStream = useCallback(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current)
+      intervalRef.current = null
+    }
+    setIsStreaming(false)
+  }, [])
+
   const startStream = useCallback(() => {
     if (isStreaming) return
 
     setIsStreaming(true)
-    frameCountRef.current = 0
 
     intervalRef.current = setInterval(() => {
       const newPoint = dataGenerator(frameCountRef.current)
@@ -38,14 +47,6 @@ function useDataStream(dataGenerator, interval = 100, maxPoints = 1000) {
       frameCountRef.current += 1
     }, interval)
   }, [dataGenerator, interval, maxPoints, isStreaming])
-
-  const stopStream = useCallback(() => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current)
-      intervalRef.current = null
-    }
-    setIsStreaming(false)
-  }, [])
 
   const clearData = useCallback(() => {
     stopStream()
