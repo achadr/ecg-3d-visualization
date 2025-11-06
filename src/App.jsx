@@ -1,8 +1,12 @@
+import Scene3D from './components/Scene3D'
+import './App.css'
+
 function App() {
   return (
     <div className="app-container">
-      <h1>Olva Medical - 3D Visualization Prototype</h1>
-      <p>React application initialized successfully</p>
+      <Scene3D>
+        {/* 3D content will go here */}
+      </Scene3D>
     </div>
   )
 }
