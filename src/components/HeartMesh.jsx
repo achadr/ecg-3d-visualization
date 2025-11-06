@@ -31,10 +31,12 @@ function HeartMesh() {
     <mesh position={[0, -0.5, 0]} rotation={[0, 0, Math.PI]}>
       <primitive object={heartShape} attach="geometry" />
       <meshStandardMaterial
-        color="#ff6b6b"
+        color="#ff4d4d"
         wireframe={true}
-        emissive="#ff0000"
-        emissiveIntensity={0.2}
+        emissive="#ff1a1a"
+        emissiveIntensity={0.3}
+        metalness={0}
+        roughness={1}
       />
     </mesh>
   )

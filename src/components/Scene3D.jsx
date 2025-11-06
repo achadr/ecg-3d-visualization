@@ -12,12 +12,27 @@ function Scene3D({ children }) {
       style={{ width: '100vw', height: '100vh' }}
     >
       {/* Ambient light for overall illumination */}
-      <ambientLight intensity={0.5} />
+      <ambientLight intensity={0.3} />
 
-      {/* Directional light for shadows and depth */}
+      {/* Main directional light */}
       <directionalLight
         position={[5, 5, 5]}
-        intensity={1}
+        intensity={0.8}
+        color="#ffffff"
+      />
+
+      {/* Rim light for depth */}
+      <directionalLight
+        position={[-3, -3, -5]}
+        intensity={0.4}
+        color="#ff9999"
+      />
+
+      {/* Top fill light */}
+      <pointLight
+        position={[0, 5, 0]}
+        intensity={0.5}
+        color="#ffcccc"
       />
 
       {/* OrbitControls for camera manipulation */}
