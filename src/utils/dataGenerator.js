@@ -20,24 +20,26 @@ function generateHeartSurfacePosition(seed) {
     return x - Math.floor(x)
   }
 
-  // Spherical coordinates with heart-shape bias
-  const theta = pseudoRandom(seed) * Math.PI * 2 // Azimuthal angle
-  const phi = pseudoRandom(seed + 1) * Math.PI // Polar angle
+  // Generate points distributed around the heart mesh
+  // Heart mesh is centered at (0, -0.5, 0) with width ~2 units and depth ~1.2
+  const u = pseudoRandom(seed)
+  const v = pseudoRandom(seed + 1)
+  const w = pseudoRandom(seed + 2)
 
-  // Base radius with variation
-  const baseRadius = 1.2
-  const radiusVariation = 0.3 * pseudoRandom(seed + 2)
-  const r = baseRadius + radiusVariation
+  // Use cylindrical-like distribution that matches heart shape better
+  const angle = u * Math.PI * 2 // Full rotation around Y axis
+  const height = v * 1.8 - 0.9 // Vertical distribution (-0.9 to 0.9)
+  const depth = (w - 0.5) * 0.4 // Reduced depth variation (-0.2 to 0.2)
 
-  // Convert to Cartesian with heart-shape adjustments
-  let x = r * Math.sin(phi) * Math.cos(theta)
-  let y = r * Math.sin(phi) * Math.sin(theta) - 0.5 // Offset downward
-  let z = r * Math.cos(phi)
+  // Base radius that varies with height (wider at top, narrower at bottom)
+  const heightFactor = Math.max(0.3, 1 - Math.abs(height) / 1.5)
+  const radius = 0.8 * heightFactor
 
-  // Heart shape perturbation (narrower at bottom, wider at top)
-  const heartFactor = 1 + 0.3 * Math.sin(phi)
-  x *= heartFactor
-  z *= heartFactor
+  // Calculate x and z from angle and radius
+  // Heart mesh is rotated 180° around Z axis and positioned at (0, -0.5, 0)
+  const x = -(radius * Math.cos(angle) - 0.5) - 1.0 // Shift more left
+  const z = depth + radius * 0.2 * Math.sin(angle) // Reduced Z variation
+  const y = height - 1.2 // Shift more down
 
   return { x, y, z }
 }
