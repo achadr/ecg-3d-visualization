@@ -1,4 +1,6 @@
 import { Canvas } from '@react-three/fiber'
+import { OrbitControls } from '@react-three/drei'
+import HeartMesh from './HeartMesh'
 
 function Scene3D({ children }) {
   return (
@@ -10,19 +12,42 @@ function Scene3D({ children }) {
       style={{ width: '100vw', height: '100vh' }}
     >
       {/* Ambient light for overall illumination */}
-      <ambientLight intensity={0.5} />
+      <ambientLight intensity={0.3} />
 
-      {/* Directional light for shadows and depth */}
+      {/* Main directional light */}
       <directionalLight
         position={[5, 5, 5]}
-        intensity={1}
+        intensity={0.8}
+        color="#ffffff"
       />
 
-      {/* Temporary test sphere - will be removed */}
-      <mesh>
-        <sphereGeometry args={[1, 32, 32]} />
-        <meshStandardMaterial color="#ff6b6b" />
-      </mesh>
+      {/* Rim light for depth */}
+      <directionalLight
+        position={[-3, -3, -5]}
+        intensity={0.4}
+        color="#ff9999"
+      />
+
+      {/* Top fill light */}
+      <pointLight
+        position={[0, 5, 0]}
+        intensity={0.5}
+        color="#ffcccc"
+      />
+
+      {/* OrbitControls for camera manipulation */}
+      <OrbitControls
+        enablePan={true}
+        enableZoom={true}
+        enableRotate={true}
+        minDistance={3}
+        maxDistance={20}
+        enableDamping={true}
+        dampingFactor={0.05}
+      />
+
+      {/* Heart mesh - stylized icosahedron */}
+      <HeartMesh />
 
       {/* Scene content */}
       {children}
