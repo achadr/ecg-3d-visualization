@@ -1,6 +1,7 @@
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import { ReactNode } from 'react'
+import type { ElectrophysiologyPoint } from '../types/electrophysiology'
 import HeartMesh from './HeartMesh'
 import DataPointCloud from './DataPointCloud'
 
@@ -9,9 +10,12 @@ import DataPointCloud from './DataPointCloud'
  */
 interface Scene3DProps {
   children?: ReactNode
+  onSelectPoint?: (point: ElectrophysiologyPoint) => void
+  selectedPoint?: ElectrophysiologyPoint | null
+  pinnedPoints?: ElectrophysiologyPoint[]
 }
 
-function Scene3D({ children }: Scene3DProps) {
+function Scene3D({ children, onSelectPoint, selectedPoint, pinnedPoints }: Scene3DProps) {
   return (
     <Canvas
       camera={{
@@ -59,7 +63,11 @@ function Scene3D({ children }: Scene3DProps) {
       <HeartMesh />
 
       {/* Dynamic data points streaming around the heart */}
-      <DataPointCloud />
+      <DataPointCloud
+        onSelectPoint={onSelectPoint}
+        selectedPoint={selectedPoint}
+        pinnedPoints={pinnedPoints}
+      />
 
       {/* Scene content */}
       {children}

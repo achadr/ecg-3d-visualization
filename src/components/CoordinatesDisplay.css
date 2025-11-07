@@ -1,0 +1,87 @@
+.coordinates-panel {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.85);
+  border: 2px solid #9d4edd;
+  border-radius: 8px;
+  padding: 20px;
+  color: #ffffff;
+  font-family: 'Courier New', monospace;
+  min-width: 200px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+}
+
+.coordinates-panel h3 {
+  margin: 0 0 15px 0;
+  font-size: 16px;
+  color: #9d4edd;
+  border-bottom: 1px solid #9d4edd;
+  padding-bottom: 8px;
+}
+
+.coord-row {
+  display: flex;
+  justify-content: space-between;
+  margin: 8px 0;
+  font-size: 13px;
+}
+
+.label {
+  font-weight: bold;
+  color: #bb86fc;
+  margin-right: 10px;
+}
+
+.value {
+  color: #00ff00;
+  text-align: right;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+  padding-top: 10px;
+  border-top: 1px solid #333;
+}
+
+.button-group button {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: bold;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Courier New', monospace;
+}
+
+.btn-pin {
+  background: #9d4edd;
+  color: white;
+}
+
+.btn-pin:hover {
+  background: #bb86fc;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(157, 78, 221, 0.4);
+}
+
+.btn-deselect {
+  background: #333;
+  color: white;
+}
+
+.btn-deselect:hover {
+  background: #555;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.btn-pin:active,
+.btn-deselect:active {
+  transform: translateY(0);
+}

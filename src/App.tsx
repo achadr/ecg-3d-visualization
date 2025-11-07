@@ -1,12 +1,49 @@
+import { useState } from 'react'
+import type { ElectrophysiologyPoint } from './types/electrophysiology'
 import Scene3D from './components/Scene3D'
+import CoordinatesDisplay from './components/CoordinatesDisplay'
+import PinnedPointsDisplay from './components/PinnedPointsDisplay'
 import './App.css'
 
 function App() {
+  const [selectedPoint, setSelectedPoint] = useState<ElectrophysiologyPoint | null>(null)
+  const [pinnedPoints, setPinnedPoints] = useState<ElectrophysiologyPoint[]>([])
+
+  const handleSelectPoint = (point: ElectrophysiologyPoint) => {
+    setSelectedPoint(point)
+  }
+
+  const handlePinPoint = () => {
+    if (selectedPoint) {
+      setPinnedPoints([...pinnedPoints, selectedPoint])
+      setSelectedPoint(null)
+    }
+  }
+
+  const handleDeselectPoint = () => {
+    setSelectedPoint(null)
+  }
+
+  const handleUnpinPoint = (point: ElectrophysiologyPoint) => {
+    setPinnedPoints(pinnedPoints.filter((p) => p.id !== point.id || p.timestamp !== point.timestamp))
+  }
+
   return (
     <div className="app-container">
-      <Scene3D>
-        {/* 3D content will go here */}
-      </Scene3D>
+      <Scene3D
+        onSelectPoint={handleSelectPoint}
+        selectedPoint={selectedPoint}
+        pinnedPoints={pinnedPoints}
+      />
+      <CoordinatesDisplay
+        point={selectedPoint}
+        onPin={handlePinPoint}
+        onDeselect={handleDeselectPoint}
+      />
+      <PinnedPointsDisplay
+        pinnedPoints={pinnedPoints}
+        onUnpin={handleUnpinPoint}
+      />
     </div>
   )
 }
