@@ -1,9 +1,17 @@
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
+import { ReactNode } from 'react'
 import HeartMesh from './HeartMesh'
 import DataPointCloud from './DataPointCloud'
 
-function Scene3D({ children }) {
+/**
+ * Props for Scene3D component
+ */
+interface Scene3DProps {
+  children?: ReactNode
+}
+
+function Scene3D({ children }: Scene3DProps) {
   return (
     <Canvas
       camera={{

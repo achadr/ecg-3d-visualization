@@ -74,8 +74,8 @@ describe('dataGenerator', () => {
       const point1 = generateElectrophysiologyPoint(5)
       const point2 = generateElectrophysiologyPoint(42)
 
-      expect(point1.id).toBe(5)
-      expect(point2.id).toBe(42)
+      expect(point1.id).toBe('5')
+      expect(point2.id).toBe('42')
     })
 
     it('should generate deterministic results for same seed', () => {
@@ -107,19 +107,19 @@ describe('dataGenerator', () => {
     it('should generate sequential IDs starting from startIndex', () => {
       const batch = generateBatch(5, 100)
 
-      expect(batch[0].id).toBe(100)
-      expect(batch[1].id).toBe(101)
-      expect(batch[2].id).toBe(102)
-      expect(batch[3].id).toBe(103)
-      expect(batch[4].id).toBe(104)
+      expect(batch[0].id).toBe('100')
+      expect(batch[1].id).toBe('101')
+      expect(batch[2].id).toBe('102')
+      expect(batch[3].id).toBe('103')
+      expect(batch[4].id).toBe('104')
     })
 
     it('should default startIndex to 0', () => {
       const batch = generateBatch(3)
 
-      expect(batch[0].id).toBe(0)
-      expect(batch[1].id).toBe(1)
-      expect(batch[2].id).toBe(2)
+      expect(batch[0].id).toBe('0')
+      expect(batch[1].id).toBe('1')
+      expect(batch[2].id).toBe('2')
     })
 
     it('should return empty array for count of 0', () => {

@@ -1,6 +1,17 @@
 import { useMemo, useRef, memo } from 'react'
 import { useFrame } from '@react-three/fiber'
+import type { Mesh, MeshStandardMaterial } from 'three'
+import type { ElectrophysiologyPoint } from '../types/electrophysiology'
 import { getColorFromVoltage } from '../utils/dataGenerator'
+
+/**
+ * Props for DataPoint component
+ */
+interface DataPointProps {
+  point: ElectrophysiologyPoint
+  scale?: number
+  opacity?: number
+}
 
 /**
  * DataPoint Component
@@ -9,14 +20,14 @@ import { getColorFromVoltage } from '../utils/dataGenerator'
  *
  * Written using TDD approach - tests written first
  *
- * @param {Object} point - Data point with position, voltage, type
- * @param {number} scale - Sphere size (default: 0.08)
- * @param {number} opacity - Sphere opacity (default: 0.9)
+ * @param point - Data point with position, voltage, type
+ * @param scale - Sphere size (default: 0.08)
+ * @param opacity - Sphere opacity (default: 0.9)
  */
-function DataPoint({ point, scale = 0.08, opacity = 0.9 }) {
-  const meshRef = useRef()
-  const materialRef = useRef()
-  const animationProgress = useRef(0)
+function DataPoint({ point, scale = 0.08, opacity = 0.9 }: DataPointProps) {
+  const meshRef = useRef<Mesh>(null)
+  const materialRef = useRef<MeshStandardMaterial>(null)
+  const animationProgress = useRef<number>(0)
 
   // Get color based on voltage (memoized to avoid recalculation)
   const color = useMemo(() => {
@@ -24,7 +35,7 @@ function DataPoint({ point, scale = 0.08, opacity = 0.9 }) {
   }, [point.voltage])
 
   // Shared geometry to reduce memory usage
-  const geometry = useMemo(() => [scale, 16, 16], [scale])
+  const geometry = useMemo(() => [scale, 16, 16] as const, [scale])
 
   // Animate fade-in and scale on mount
   useFrame((_state, delta) => {

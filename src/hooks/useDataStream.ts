@@ -1,4 +1,16 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
+import type { ElectrophysiologyPoint, PointGenerator } from '../types/electrophysiology'
+
+/**
+ * Return type for useDataStream hook
+ */
+interface UseDataStreamReturn {
+  data: ElectrophysiologyPoint[]
+  isStreaming: boolean
+  startStream: () => void
+  stopStream: () => void
+  clearData: () => void
+}
 
 /**
  * Custom hook to simulate real-time data streaming
@@ -6,16 +18,20 @@ import { useState, useEffect, useCallback, useRef } from 'react'
  *
  * Written using TDD approach - tests written first
  *
- * @param {Function} dataGenerator - Function that generates data points
- * @param {number} interval - Interval in ms between data generations (default: 100ms)
- * @param {number} maxPoints - Maximum number of points to keep in memory (default: 1000)
- * @returns {Object} { data, isStreaming, startStream, stopStream, clearData }
+ * @param dataGenerator - Function that generates data points
+ * @param interval - Interval in ms between data generations (default: 100ms)
+ * @param maxPoints - Maximum number of points to keep in memory (default: 1000)
+ * @returns Object with data, streaming state, and control functions
  */
-function useDataStream(dataGenerator, interval = 100, maxPoints = 1000) {
-  const [data, setData] = useState([])
-  const [isStreaming, setIsStreaming] = useState(false)
-  const intervalRef = useRef(null)
-  const frameCountRef = useRef(0)
+function useDataStream(
+  dataGenerator: PointGenerator,
+  interval: number = 100,
+  maxPoints: number = 1000
+): UseDataStreamReturn {
+  const [data, setData] = useState<ElectrophysiologyPoint[]>([])
+  const [isStreaming, setIsStreaming] = useState<boolean>(false)
+  const intervalRef = useRef<NodeJS.Timeout | null>(null)
+  const frameCountRef = useRef<number>(0)
 
   const stopStream = useCallback(() => {
     if (intervalRef.current) {

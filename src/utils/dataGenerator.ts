@@ -6,16 +6,23 @@
  * Written using TDD approach - tests written first
  */
 
+import type {
+  ElectrophysiologyPoint,
+  TissueType,
+  Point3D,
+  ColorValue
+} from '../types/electrophysiology'
+
 /**
  * Generates a random point on the surface of a heart-shaped geometry
  * Uses spherical coordinates with perturbations to approximate heart shape
  *
- * @param {number} seed - Seed value for deterministic randomness
- * @returns {Object} 3D position {x, y, z}
+ * @param seed - Seed value for deterministic randomness
+ * @returns 3D position {x, y, z}
  */
-function generateHeartSurfacePosition(seed) {
+function generateHeartSurfacePosition(seed: number): Point3D {
   // Use seed for reproducible randomness
-  const pseudoRandom = (s) => {
+  const pseudoRandom = (s: number): number => {
     const x = Math.sin(s) * 10000
     return x - Math.floor(x)
   }
@@ -50,10 +57,10 @@ function generateHeartSurfacePosition(seed) {
  * Scar tissue: < 0.5 mV
  * Border zone: 0.5-1.5 mV
  *
- * @param {number} seed - Seed for variation
- * @returns {number} Voltage in millivolts
+ * @param seed - Seed for variation
+ * @returns Voltage in millivolts
  */
-function generateVoltage(seed) {
+function generateVoltage(seed: number): number {
   const random = Math.sin(seed * 0.1) * 0.5 + 0.5 // 0-1 range
 
   // 70% healthy, 20% border zone, 10% scar
@@ -73,16 +80,16 @@ function generateVoltage(seed) {
  * Main data generator function
  * Creates a complete electrophysiology data point
  *
- * @param {number} frameCount - Current frame/iteration number
- * @returns {Object} Data point with id, timestamp, position, voltage, and type
+ * @param frameCount - Current frame/iteration number
+ * @returns Data point with id, timestamp, position, voltage, and type
  */
-export function generateElectrophysiologyPoint(frameCount) {
+export function generateElectrophysiologyPoint(frameCount: number): ElectrophysiologyPoint {
   const timestamp = Date.now()
   const position = generateHeartSurfacePosition(frameCount)
   const voltage = generateVoltage(frameCount)
 
   // Classify tissue type based on voltage
-  let type = 'healthy'
+  let type: TissueType = 'healthy'
   if (voltage < 0.5) {
     type = 'scar'
   } else if (voltage < 1.5) {
@@ -90,7 +97,7 @@ export function generateElectrophysiologyPoint(frameCount) {
   }
 
   return {
-    id: frameCount,
+    id: String(frameCount),
     timestamp,
     position,
     voltage: parseFloat(voltage.toFixed(2)),
@@ -102,12 +109,12 @@ export function generateElectrophysiologyPoint(frameCount) {
  * Batch generator for testing purposes
  * Generates multiple points at once
  *
- * @param {number} count - Number of points to generate
- * @param {number} startIndex - Starting index for IDs
- * @returns {Array} Array of data points
+ * @param count - Number of points to generate
+ * @param startIndex - Starting index for IDs
+ * @returns Array of data points
  */
-export function generateBatch(count, startIndex = 0) {
-  const points = []
+export function generateBatch(count: number, startIndex: number = 0): ElectrophysiologyPoint[] {
+  const points: ElectrophysiologyPoint[] = []
   for (let i = 0; i < count; i++) {
     points.push(generateElectrophysiologyPoint(startIndex + i))
   }
@@ -118,10 +125,10 @@ export function generateBatch(count, startIndex = 0) {
  * Helper to determine color based on voltage
  * For visualization purposes
  *
- * @param {number} voltage - Voltage value in mV
- * @returns {string} Hex color code
+ * @param voltage - Voltage value in mV
+ * @returns Hex color code
  */
-export function getColorFromVoltage(voltage) {
+export function getColorFromVoltage(voltage: number): ColorValue {
   if (voltage < 0.5) {
     // Scar - Red
     return '#ff0000'

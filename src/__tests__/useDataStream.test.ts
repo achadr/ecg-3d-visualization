@@ -24,7 +24,7 @@ describe('useDataStream', () => {
   })
 
   it('should start streaming when startStream is called', () => {
-    const mockGenerator = vi.fn((frameCount) => ({ id: frameCount, value: Math.random() }))
+    const mockGenerator = vi.fn((frameCount) => ({ id: String(frameCount), position: { x: 0, y: 0, z: 0 }, voltage: 1.5, type: 'healthy' as const, timestamp: Date.now() }))
     const { result } = renderHook(() => useDataStream(mockGenerator, 100))
 
     act(() => {
@@ -35,7 +35,7 @@ describe('useDataStream', () => {
   })
 
   it('should generate data points at specified interval', () => {
-    const mockGenerator = vi.fn((frameCount) => ({ id: frameCount, value: frameCount }))
+    const mockGenerator = vi.fn((frameCount) => ({ id: String(frameCount), position: { x: 0, y: 0, z: 0 }, voltage: 1.5, type: 'healthy' as const, timestamp: Date.now() }))
     const { result } = renderHook(() => useDataStream(mockGenerator, 100))
 
     act(() => {
@@ -44,18 +44,18 @@ describe('useDataStream', () => {
     })
 
     expect(result.current.data).toHaveLength(1)
-    expect(result.current.data[0].id).toBe(0)
+    expect(result.current.data[0].id).toBe('0')
 
     act(() => {
       vi.advanceTimersByTime(100)
     })
 
     expect(result.current.data).toHaveLength(2)
-    expect(result.current.data[1].id).toBe(1)
+    expect(result.current.data[1].id).toBe('1')
   })
 
   it('should stop streaming when stopStream is called', () => {
-    const mockGenerator = vi.fn((frameCount) => ({ id: frameCount }))
+    const mockGenerator = vi.fn((frameCount) => ({ id: String(frameCount), position: { x: 0, y: 0, z: 0 }, voltage: 1.5, type: 'healthy' as const, timestamp: Date.now() }))
     const { result } = renderHook(() => useDataStream(mockGenerator, 100))
 
     act(() => {
@@ -81,7 +81,7 @@ describe('useDataStream', () => {
   })
 
   it('should clear data when clearData is called', () => {
-    const mockGenerator = vi.fn((frameCount) => ({ id: frameCount }))
+    const mockGenerator = vi.fn((frameCount) => ({ id: String(frameCount), position: { x: 0, y: 0, z: 0 }, voltage: 1.5, type: 'healthy' as const, timestamp: Date.now() }))
     const { result } = renderHook(() => useDataStream(mockGenerator, 100))
 
     act(() => {
@@ -100,7 +100,7 @@ describe('useDataStream', () => {
   })
 
   it('should respect maxPoints limit', () => {
-    const mockGenerator = vi.fn((frameCount) => ({ id: frameCount }))
+    const mockGenerator = vi.fn((frameCount) => ({ id: String(frameCount), position: { x: 0, y: 0, z: 0 }, voltage: 1.5, type: 'healthy' as const, timestamp: Date.now() }))
     const { result } = renderHook(() => useDataStream(mockGenerator, 100, 5))
 
     act(() => {
@@ -112,11 +112,11 @@ describe('useDataStream', () => {
 
     // Verify we kept the most recent points
     const ids = result.current.data.map(d => d.id)
-    expect(ids).toContain(9) // Most recent
+    expect(ids).toContain('9') // Most recent
   })
 
   it('should not start if already streaming', () => {
-    const mockGenerator = vi.fn((frameCount) => ({ id: frameCount }))
+    const mockGenerator = vi.fn((frameCount) => ({ id: String(frameCount), position: { x: 0, y: 0, z: 0 }, voltage: 1.5, type: 'healthy' as const, timestamp: Date.now() }))
     const { result } = renderHook(() => useDataStream(mockGenerator, 100))
 
     act(() => {
@@ -138,7 +138,7 @@ describe('useDataStream', () => {
   })
 
   it('should cleanup interval on unmount', () => {
-    const mockGenerator = vi.fn((frameCount) => ({ id: frameCount }))
+    const mockGenerator = vi.fn((frameCount) => ({ id: String(frameCount), position: { x: 0, y: 0, z: 0 }, voltage: 1.5, type: 'healthy' as const, timestamp: Date.now() }))
     const { result, unmount } = renderHook(() => useDataStream(mockGenerator, 100))
 
     act(() => {
@@ -160,7 +160,7 @@ describe('useDataStream', () => {
   })
 
   it('should use default interval of 100ms', () => {
-    const mockGenerator = vi.fn((frameCount) => ({ id: frameCount }))
+    const mockGenerator = vi.fn((frameCount) => ({ id: String(frameCount), position: { x: 0, y: 0, z: 0 }, voltage: 1.5, type: 'healthy' as const, timestamp: Date.now() }))
     const { result } = renderHook(() => useDataStream(mockGenerator))
 
     act(() => {
@@ -172,7 +172,7 @@ describe('useDataStream', () => {
   })
 
   it('should use default maxPoints of 1000', () => {
-    const mockGenerator = vi.fn((frameCount) => ({ id: frameCount }))
+    const mockGenerator = vi.fn((frameCount) => ({ id: String(frameCount), position: { x: 0, y: 0, z: 0 }, voltage: 1.5, type: 'healthy' as const, timestamp: Date.now() }))
     const { result } = renderHook(() => useDataStream(mockGenerator, 10))
 
     act(() => {

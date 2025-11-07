@@ -1,10 +1,12 @@
 import { describe, it, expect } from 'vitest'
 import { render } from '@testing-library/react'
 import { Canvas } from '@react-three/fiber'
+import { ReactElement } from 'react'
 import DataPoint from '../components/DataPoint'
+import type { ElectrophysiologyPoint } from '../types/electrophysiology'
 
 // Helper to render 3D components in test environment
-const render3D = (component) => {
+const render3D = (component: ReactElement) => {
   return render(
     <Canvas>
       {component}
@@ -13,8 +15,8 @@ const render3D = (component) => {
 }
 
 describe('DataPoint', () => {
-  const mockPoint = {
-    id: 1,
+  const mockPoint: ElectrophysiologyPoint = {
+    id: '1',
     position: { x: 1, y: 2, z: 3 },
     voltage: 3.5,
     type: 'healthy',
@@ -32,7 +34,7 @@ describe('DataPoint', () => {
   })
 
   it('should render at the correct position', () => {
-    const customPoint = {
+    const customPoint: ElectrophysiologyPoint = {
       ...mockPoint,
       position: { x: 5, y: 10, z: 15 }
     }
@@ -41,7 +43,7 @@ describe('DataPoint', () => {
   })
 
   it('should handle healthy tissue type', () => {
-    const healthyPoint = {
+    const healthyPoint: ElectrophysiologyPoint = {
       ...mockPoint,
       type: 'healthy',
       voltage: 3.0
@@ -51,7 +53,7 @@ describe('DataPoint', () => {
   })
 
   it('should handle border tissue type', () => {
-    const borderPoint = {
+    const borderPoint: ElectrophysiologyPoint = {
       ...mockPoint,
       type: 'border',
       voltage: 1.0
@@ -61,7 +63,7 @@ describe('DataPoint', () => {
   })
 
   it('should handle scar tissue type', () => {
-    const scarPoint = {
+    const scarPoint: ElectrophysiologyPoint = {
       ...mockPoint,
       type: 'scar',
       voltage: 0.3

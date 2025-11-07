@@ -6,7 +6,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'happy-dom',
-    setupFiles: './src/__tests__/setup.js',
+    setupFiles: './src/__tests__/setup.ts',
     css: true,
     coverage: {
       provider: 'v8',
@@ -15,7 +15,7 @@ export default defineConfig({
         'node_modules/',
         'src/__tests__/',
         '*.config.js',
-        'src/main.jsx'
+        'src/main.tsx'
       ]
     }
   }
