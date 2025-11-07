@@ -1,6 +1,7 @@
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import HeartMesh from './HeartMesh'
+import DataPointCloud from './DataPointCloud'
 
 function Scene3D({ children }) {
   return (
@@ -48,6 +49,9 @@ function Scene3D({ children }) {
 
       {/* Heart mesh - stylized icosahedron */}
       <HeartMesh />
+
+      {/* Dynamic data points streaming around the heart */}
+      <DataPointCloud />
 
       {/* Scene content */}
       {children}
