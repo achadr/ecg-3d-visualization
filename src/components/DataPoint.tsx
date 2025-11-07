@@ -1,5 +1,5 @@
-import { useMemo, useRef, memo } from 'react'
-import { useFrame } from '@react-three/fiber'
+import { useMemo, useRef, memo, useState } from 'react'
+import { useFrame, type ThreeEvent } from '@react-three/fiber'
 import type { Mesh, MeshStandardMaterial } from 'three'
 import type { ElectrophysiologyPoint } from '../types/electrophysiology'
 import { getColorFromVoltage } from '../utils/dataGenerator'
@@ -11,6 +11,7 @@ interface DataPointProps {
   point: ElectrophysiologyPoint
   scale?: number
   opacity?: number
+  onSelect?: (point: ElectrophysiologyPoint) => void
 }
 
 /**
@@ -23,11 +24,21 @@ interface DataPointProps {
  * @param point - Data point with position, voltage, type
  * @param scale - Sphere size (default: 0.08)
  * @param opacity - Sphere opacity (default: 0.9)
+ * @param onSelect - Optional callback when point is clicked
  */
-function DataPoint({ point, scale = 0.08, opacity = 0.9 }: DataPointProps) {
+function DataPoint({ point, scale = 0.08, opacity = 0.9, onSelect }: DataPointProps) {
   const meshRef = useRef<Mesh>(null)
   const materialRef = useRef<MeshStandardMaterial>(null)
   const animationProgress = useRef<number>(0)
+  const [hovered, setHovered] = useState<boolean>(false)
+
+  // Handle click on point
+  const handleClick = (event: ThreeEvent<MouseEvent>) => {
+    event.stopPropagation()
+    if (onSelect) {
+      onSelect(point)
+    }
+  }
 
   // Get color based on voltage (memoized to avoid recalculation)
   const color = useMemo(() => {
@@ -63,15 +74,18 @@ function DataPoint({ point, scale = 0.08, opacity = 0.9 }: DataPointProps) {
     <mesh
       ref={meshRef}
       position={[point.position.x, point.position.y, point.position.z]}
+      onClick={handleClick}
+      onPointerOver={() => setHovered(true)}
+      onPointerOut={() => setHovered(false)}
     >
       <sphereGeometry args={geometry} />
       <meshStandardMaterial
         ref={materialRef}
-        color={color}
+        color={hovered ? '#00ff00' : color}
         transparent={true}
         opacity={0}
-        emissive={color}
-        emissiveIntensity={0.4}
+        emissive={hovered ? '#00ff00' : color}
+        emissiveIntensity={hovered ? 0.8 : 0.4}
         metalness={0}
         roughness={1}
       />
