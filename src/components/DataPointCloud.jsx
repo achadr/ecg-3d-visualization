@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import useDataStream from '../hooks/useDataStream'
 import { generateElectrophysiologyPoint } from '../utils/dataGenerator'
 import DataPoint from './DataPoint'
@@ -6,6 +6,7 @@ import DataPoint from './DataPoint'
 /**
  * DataPointCloud Component
  * Manages the data stream and renders all active data points
+ * Optimized with memoization for better performance
  *
  * Automatically starts streaming on mount
  */
@@ -21,18 +22,19 @@ function DataPointCloud() {
     startStream()
   }, [startStream])
 
-  return (
-    <group>
-      {data.map((point) => (
-        <DataPoint
-          key={`${point.id}-${point.timestamp}`}
-          point={point}
-          scale={0.08}
-          opacity={0.8}
-        />
-      ))}
-    </group>
-  )
+  // Memoize rendered points to avoid unnecessary recalculations
+  const renderedPoints = useMemo(() => {
+    return data.map((point) => (
+      <DataPoint
+        key={`${point.id}-${point.timestamp}`}
+        point={point}
+        scale={0.08}
+        opacity={0.8}
+      />
+    ))
+  }, [data])
+
+  return <group>{renderedPoints}</group>
 }
 
 export default DataPointCloud
