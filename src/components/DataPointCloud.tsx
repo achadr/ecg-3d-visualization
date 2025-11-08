@@ -1,7 +1,18 @@
-import { useEffect, useMemo } from 'react'
-import useDataStream from '../hooks/useDataStream'
+import { useEffect, useMemo, useState, useRef } from 'react'
+import type { ElectrophysiologyPoint } from '../types/electrophysiology'
 import { generateElectrophysiologyPoint } from '../utils/dataGenerator'
 import DataPoint from './DataPoint'
+
+/**
+ * Props for DataPointCloud component
+ */
+interface DataPointCloudProps {
+  onSelectPoint?: (point: ElectrophysiologyPoint) => void
+  onHoverPoint?: (point: ElectrophysiologyPoint | null) => void
+  selectedPoint?: ElectrophysiologyPoint | null
+  hoveredPoint?: ElectrophysiologyPoint | null
+  pinnedPoints?: ElectrophysiologyPoint[]
+}
 
 /**
  * DataPointCloud Component
@@ -10,31 +21,111 @@ import DataPoint from './DataPoint'
  *
  * Automatically starts streaming on mount
  */
-function DataPointCloud() {
-  const { data, startStream } = useDataStream(
-    generateElectrophysiologyPoint,
-    100,  // Generate new point every 100ms
-    50    // Keep last 50 points
-  )
+function DataPointCloud({ onSelectPoint, onHoverPoint, selectedPoint = null, hoveredPoint = null, pinnedPoints = [] }: DataPointCloudProps) {
+  const [livePoints, setLivePoints] = useState<ElectrophysiologyPoint[]>([])
+  const frameCountRef = useRef<number>(0)
 
-  // Auto-start streaming on mount
+  // Generate 10 points that update positions every second
   useEffect(() => {
-    startStream()
-  }, [startStream])
+    // Initial generation of 10 points
+    const initialPoints = Array.from({ length: 10 }, (_, i) =>
+      generateElectrophysiologyPoint(i)
+    )
+    setLivePoints(initialPoints)
 
-  // Memoize rendered points to avoid unnecessary recalculations
+    // Update all points every second
+    const interval = setInterval(() => {
+      frameCountRef.current += 1
+      const updatedPoints = Array.from({ length: 10 }, (_, i) =>
+        generateElectrophysiologyPoint(frameCountRef.current * 10 + i)
+      )
+      setLivePoints(updatedPoints)
+    }, 1000)
+
+    return () => clearInterval(interval)
+  }, [])
+
+  // Filter out selected, hovered, and pinned points from live stream
+  // Selected and hovered points are "frozen" and don't update with the stream
+  const filteredLivePoints = useMemo(() => {
+    return livePoints.filter((point) => {
+      // Exclude selected point
+      if (selectedPoint && point.id === selectedPoint.id) {
+        return false
+      }
+      // Exclude hovered point
+      if (hoveredPoint && point.id === hoveredPoint.id) {
+        return false
+      }
+      // Exclude pinned points
+      return !pinnedPoints.some((pinned) => pinned.id === point.id)
+    })
+  }, [livePoints, selectedPoint, hoveredPoint, pinnedPoints])
+
+  // Memoize rendered live points to avoid unnecessary recalculations
   const renderedPoints = useMemo(() => {
-    return data.map((point) => (
+    return filteredLivePoints.map((point) => (
       <DataPoint
         key={`${point.id}-${point.timestamp}`}
         point={point}
         scale={0.08}
         opacity={0.8}
+        onSelect={onSelectPoint}
+        onHover={onHoverPoint}
       />
     ))
-  }, [data])
+  }, [filteredLivePoints, onSelectPoint, onHoverPoint])
 
-  return <group>{renderedPoints}</group>
+  // Render hovered point separately (frozen while hovering)
+  const renderedHoveredPoint = useMemo(() => {
+    if (!hoveredPoint || (selectedPoint && hoveredPoint.id === selectedPoint.id)) return null
+    return (
+      <DataPoint
+        key={`hovered-${hoveredPoint.id}-${hoveredPoint.timestamp}`}
+        point={hoveredPoint}
+        scale={0.08}
+        opacity={0.8}
+        onSelect={onSelectPoint}
+        onHover={onHoverPoint}
+      />
+    )
+  }, [hoveredPoint, selectedPoint, onSelectPoint, onHoverPoint])
+
+  // Render selected point separately (frozen at clicked position)
+  const renderedSelectedPoint = useMemo(() => {
+    if (!selectedPoint) return null
+    return (
+      <DataPoint
+        key={`selected-${selectedPoint.id}-${selectedPoint.timestamp}`}
+        point={selectedPoint}
+        scale={0.09}
+        opacity={1.0}
+        onSelect={onSelectPoint}
+      />
+    )
+  }, [selectedPoint, onSelectPoint])
+
+  // Render pinned points with different visual style
+  const renderedPinnedPoints = useMemo(() => {
+    return pinnedPoints.map((point) => (
+      <DataPoint
+        key={`pinned-${point.id}-${point.timestamp}`}
+        point={point}
+        scale={0.1}
+        opacity={1.0}
+        onSelect={onSelectPoint}
+      />
+    ))
+  }, [pinnedPoints, onSelectPoint])
+
+  return (
+    <group>
+      {renderedPoints}
+      {renderedHoveredPoint}
+      {renderedSelectedPoint}
+      {renderedPinnedPoints}
+    </group>
+  )
 }
 
 export default DataPointCloud
