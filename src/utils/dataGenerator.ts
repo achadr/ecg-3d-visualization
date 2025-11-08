@@ -141,4 +141,30 @@ export function getColorFromVoltage(voltage: number): ColorValue {
   }
 }
 
+/**
+ * Helper to generate a unique indicator color for each pinned point
+ * Uses a palette of vibrant, distinct colors that cycle through
+ *
+ * @param index - Index of the pinned point (0, 1, 2, ...)
+ * @returns Hex color code for the indicator ring
+ */
+export function getIndicatorColorFromIndex(index: number): ColorValue {
+  // Palette of 10 vibrant, highly distinguishable colors
+  const colorPalette: ColorValue[] = [
+    '#00ffff', // Cyan
+    '#ff00ff', // Magenta
+    '#ffff00', // Yellow
+    '#00ff00', // Lime green
+    '#ff6600', // Orange
+    '#0099ff', // Sky blue
+    '#ff0099', // Hot pink
+    '#66ff00', // Chartreuse
+    '#9900ff', // Purple
+    '#ff3333', // Red
+  ]
+
+  // Cycle through the palette if more than 10 points are pinned
+  return colorPalette[index % colorPalette.length]
+}
+
 export default generateElectrophysiologyPoint
