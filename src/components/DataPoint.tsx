@@ -12,6 +12,7 @@ interface DataPointProps {
   scale?: number
   opacity?: number
   onSelect?: (point: ElectrophysiologyPoint) => void
+  onHover?: (point: ElectrophysiologyPoint | null) => void
 }
 
 /**
@@ -26,7 +27,7 @@ interface DataPointProps {
  * @param opacity - Sphere opacity (default: 0.9)
  * @param onSelect - Optional callback when point is clicked
  */
-function DataPoint({ point, scale = 0.08, opacity = 0.9, onSelect }: DataPointProps) {
+function DataPoint({ point, scale = 0.08, opacity = 0.9, onSelect, onHover }: DataPointProps) {
   const meshRef = useRef<Mesh>(null)
   const materialRef = useRef<MeshStandardMaterial>(null)
   const animationProgress = useRef<number>(0)
@@ -37,6 +38,22 @@ function DataPoint({ point, scale = 0.08, opacity = 0.9, onSelect }: DataPointPr
     event.stopPropagation()
     if (onSelect) {
       onSelect(point)
+    }
+  }
+
+  // Handle hover start
+  const handlePointerOver = () => {
+    setHovered(true)
+    if (onHover) {
+      onHover(point)
+    }
+  }
+
+  // Handle hover end
+  const handlePointerOut = () => {
+    setHovered(false)
+    if (onHover) {
+      onHover(null)
     }
   }
 
@@ -75,8 +92,8 @@ function DataPoint({ point, scale = 0.08, opacity = 0.9, onSelect }: DataPointPr
       ref={meshRef}
       position={[point.position.x, point.position.y, point.position.z]}
       onClick={handleClick}
-      onPointerOver={() => setHovered(true)}
-      onPointerOut={() => setHovered(false)}
+      onPointerOver={handlePointerOver}
+      onPointerOut={handlePointerOut}
     >
       <sphereGeometry args={geometry} />
       <meshStandardMaterial

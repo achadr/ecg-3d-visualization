@@ -7,10 +7,15 @@ import './App.css'
 
 function App() {
   const [selectedPoint, setSelectedPoint] = useState<ElectrophysiologyPoint | null>(null)
+  const [hoveredPoint, setHoveredPoint] = useState<ElectrophysiologyPoint | null>(null)
   const [pinnedPoints, setPinnedPoints] = useState<ElectrophysiologyPoint[]>([])
 
   const handleSelectPoint = (point: ElectrophysiologyPoint) => {
     setSelectedPoint(point)
+  }
+
+  const handleHoverPoint = (point: ElectrophysiologyPoint | null) => {
+    setHoveredPoint(point)
   }
 
   const handlePinPoint = () => {
@@ -32,7 +37,9 @@ function App() {
     <div className="app-container">
       <Scene3D
         onSelectPoint={handleSelectPoint}
+        onHoverPoint={handleHoverPoint}
         selectedPoint={selectedPoint}
+        hoveredPoint={hoveredPoint}
         pinnedPoints={pinnedPoints}
       />
       <CoordinatesDisplay

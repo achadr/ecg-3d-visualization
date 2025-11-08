@@ -11,11 +11,13 @@ import DataPointCloud from './DataPointCloud'
 interface Scene3DProps {
   children?: ReactNode
   onSelectPoint?: (point: ElectrophysiologyPoint) => void
+  onHoverPoint?: (point: ElectrophysiologyPoint | null) => void
   selectedPoint?: ElectrophysiologyPoint | null
+  hoveredPoint?: ElectrophysiologyPoint | null
   pinnedPoints?: ElectrophysiologyPoint[]
 }
 
-function Scene3D({ children, onSelectPoint, selectedPoint, pinnedPoints }: Scene3DProps) {
+function Scene3D({ children, onSelectPoint, onHoverPoint, selectedPoint, hoveredPoint, pinnedPoints }: Scene3DProps) {
   return (
     <Canvas
       camera={{
@@ -65,7 +67,9 @@ function Scene3D({ children, onSelectPoint, selectedPoint, pinnedPoints }: Scene
       {/* Dynamic data points streaming around the heart */}
       <DataPointCloud
         onSelectPoint={onSelectPoint}
+        onHoverPoint={onHoverPoint}
         selectedPoint={selectedPoint}
+        hoveredPoint={hoveredPoint}
         pinnedPoints={pinnedPoints}
       />
 
