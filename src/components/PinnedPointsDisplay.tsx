@@ -1,4 +1,5 @@
 import type { ElectrophysiologyPoint } from '../types/electrophysiology'
+import { getIndicatorColorFromIndex } from '../utils/dataGenerator'
 import './PinnedPointsDisplay.css'
 
 /**
@@ -19,43 +20,53 @@ function PinnedPointsDisplay({ pinnedPoints, onUnpin }: PinnedPointsDisplayProps
 
   return (
     <div className="pinned-points-container">
-      {pinnedPoints.map((point, index) => (
-        <div
-          key={`pinned-panel-${point.id}-${point.timestamp}`}
-          className="pinned-panel"
-          style={{ top: `${20 + index * 220}px` }}
-        >
-          <h3>Pinned #{point.id}</h3>
-          <div className="coord-row">
-            <span className="label">Type:</span>
-            <span className="value">{point.type}</span>
+      {pinnedPoints.map((point, index) => {
+        const indicatorColor = getIndicatorColorFromIndex(index)
+        return (
+          <div
+            key={`pinned-panel-${point.id}-${point.timestamp}`}
+            className="pinned-panel"
+            style={{
+              top: `${20 + index * 220}px`,
+              borderColor: indicatorColor
+            }}
+          >
+            <h3 style={{ color: indicatorColor, borderBottomColor: indicatorColor }}>Pinned #{point.id}</h3>
+            <div className="coord-row">
+              <span className="label" style={{ color: indicatorColor }}>Type:</span>
+              <span className="value">{point.type}</span>
+            </div>
+            <div className="coord-row">
+              <span className="label" style={{ color: indicatorColor }}>Voltage:</span>
+              <span className="value">{point.voltage.toFixed(2)} mV</span>
+            </div>
+            <div className="coord-row">
+              <span className="label" style={{ color: indicatorColor }}>x:</span>
+              <span className="value">{point.position.x.toFixed(2)}</span>
+            </div>
+            <div className="coord-row">
+              <span className="label" style={{ color: indicatorColor }}>y:</span>
+              <span className="value">{point.position.y.toFixed(2)}</span>
+            </div>
+            <div className="coord-row">
+              <span className="label" style={{ color: indicatorColor }}>z:</span>
+              <span className="value">{point.position.z.toFixed(2)}</span>
+            </div>
+            <div className="button-group">
+              <button
+                className="btn-unpin"
+                style={{
+                  backgroundColor: indicatorColor,
+                  color: '#000'
+                }}
+                onClick={() => onUnpin(point)}
+              >
+                Unpin
+              </button>
+            </div>
           </div>
-          <div className="coord-row">
-            <span className="label">Voltage:</span>
-            <span className="value">{point.voltage.toFixed(2)} mV</span>
-          </div>
-          <div className="coord-row">
-            <span className="label">x:</span>
-            <span className="value">{point.position.x.toFixed(2)}</span>
-          </div>
-          <div className="coord-row">
-            <span className="label">y:</span>
-            <span className="value">{point.position.y.toFixed(2)}</span>
-          </div>
-          <div className="coord-row">
-            <span className="label">z:</span>
-            <span className="value">{point.position.z.toFixed(2)}</span>
-          </div>
-          <div className="button-group">
-            <button
-              className="btn-unpin"
-              onClick={() => onUnpin(point)}
-            >
-              Unpin
-            </button>
-          </div>
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 }

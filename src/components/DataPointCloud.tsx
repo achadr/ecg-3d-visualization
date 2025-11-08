@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useRef } from 'react'
 import type { ElectrophysiologyPoint } from '../types/electrophysiology'
-import { generateElectrophysiologyPoint } from '../utils/dataGenerator'
+import { generateElectrophysiologyPoint, getIndicatorColorFromIndex } from '../utils/dataGenerator'
 import DataPoint from './DataPoint'
 
 /**
@@ -105,17 +105,37 @@ function DataPointCloud({ onSelectPoint, onHoverPoint, selectedPoint = null, hov
     )
   }, [selectedPoint, onSelectPoint])
 
-  // Render pinned points with different visual style
+  // Render pinned points with different visual style and indicator rings
   const renderedPinnedPoints = useMemo(() => {
-    return pinnedPoints.map((point) => (
-      <DataPoint
-        key={`pinned-${point.id}-${point.timestamp}`}
-        point={point}
-        scale={0.1}
-        opacity={1.0}
-        onSelect={onSelectPoint}
-      />
-    ))
+    return pinnedPoints.map((point, index) => {
+      const indicatorColor = getIndicatorColorFromIndex(index)
+      return (
+        <group key={`pinned-group-${point.id}-${point.timestamp}`}>
+          {/* Indicator ring around pinned point */}
+          <mesh
+            position={[point.position.x, point.position.y, point.position.z]}
+            rotation={[Math.PI / 2, 0, 0]}
+          >
+            <torusGeometry args={[0.15, 0.02, 16, 32]} />
+            <meshStandardMaterial
+              color={indicatorColor}
+              emissive={indicatorColor}
+              emissiveIntensity={0.8}
+              metalness={0.3}
+              roughness={0.7}
+            />
+          </mesh>
+          {/* The pinned point itself */}
+          <DataPoint
+            key={`pinned-${point.id}-${point.timestamp}`}
+            point={point}
+            scale={0.1}
+            opacity={1.0}
+            onSelect={onSelectPoint}
+          />
+        </group>
+      )
+    })
   }, [pinnedPoints, onSelectPoint])
 
   return (
