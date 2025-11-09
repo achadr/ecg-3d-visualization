@@ -1,11 +1,10 @@
 import type { ElectrophysiologyPoint } from '../types/electrophysiology'
 import { getIndicatorColorFromIndex } from '../utils/dataGenerator'
+import PointDataDisplay from './PointDataDisplay'
 import './PinnedPointsDisplay.css'
 import {
   PINNED_PANEL_TOP_OFFSET_PX,
   PINNED_PANEL_VERTICAL_SPACING_PX,
-  COORDINATE_DECIMAL_PLACES,
-  VOLTAGE_DECIMAL_PLACES,
 } from '../constants/visualization'
 
 /**
@@ -38,26 +37,7 @@ function PinnedPointsDisplay({ pinnedPoints, onUnpin }: PinnedPointsDisplayProps
             }}
           >
             <h3 style={{ color: indicatorColor, borderBottomColor: indicatorColor }}>Pinned #{point.id}</h3>
-            <div className="coord-row">
-              <span className="label" style={{ color: indicatorColor }}>Type:</span>
-              <span className="value">{point.type}</span>
-            </div>
-            <div className="coord-row">
-              <span className="label" style={{ color: indicatorColor }}>Voltage:</span>
-              <span className="value">{point.voltage.toFixed(VOLTAGE_DECIMAL_PLACES)} mV</span>
-            </div>
-            <div className="coord-row">
-              <span className="label" style={{ color: indicatorColor }}>x:</span>
-              <span className="value">{point.position.x.toFixed(COORDINATE_DECIMAL_PLACES)}</span>
-            </div>
-            <div className="coord-row">
-              <span className="label" style={{ color: indicatorColor }}>y:</span>
-              <span className="value">{point.position.y.toFixed(COORDINATE_DECIMAL_PLACES)}</span>
-            </div>
-            <div className="coord-row">
-              <span className="label" style={{ color: indicatorColor }}>z:</span>
-              <span className="value">{point.position.z.toFixed(COORDINATE_DECIMAL_PLACES)}</span>
-            </div>
+            <PointDataDisplay point={point} labelColor={indicatorColor} />
             <div className="button-group">
               <button
                 className="btn-unpin"

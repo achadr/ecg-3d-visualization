@@ -1,9 +1,6 @@
 import type { ElectrophysiologyPoint } from '../types/electrophysiology'
+import PointDataDisplay from './PointDataDisplay'
 import './CoordinatesDisplay.css'
-import {
-  COORDINATE_DECIMAL_PLACES,
-  VOLTAGE_DECIMAL_PLACES,
-} from '../constants/visualization'
 
 interface CoordinatesDisplayProps {
   point: ElectrophysiologyPoint | null
@@ -26,26 +23,7 @@ function CoordinatesDisplay({ point, onPin, onDeselect }: CoordinatesDisplayProp
   return (
     <div className="coordinates-panel">
       <h3>Point #{point.id}</h3>
-      <div className="coord-row">
-        <span className="label">Type:</span>
-        <span className="value">{point.type}</span>
-      </div>
-      <div className="coord-row">
-        <span className="label">Voltage:</span>
-        <span className="value">{point.voltage.toFixed(VOLTAGE_DECIMAL_PLACES)} mV</span>
-      </div>
-      <div className="coord-row">
-        <span className="label">x:</span>
-        <span className="value">{point.position.x.toFixed(COORDINATE_DECIMAL_PLACES)}</span>
-      </div>
-      <div className="coord-row">
-        <span className="label">y:</span>
-        <span className="value">{point.position.y.toFixed(COORDINATE_DECIMAL_PLACES)}</span>
-      </div>
-      <div className="coord-row">
-        <span className="label">z:</span>
-        <span className="value">{point.position.z.toFixed(COORDINATE_DECIMAL_PLACES)}</span>
-      </div>
+      <PointDataDisplay point={point} />
       <div className="button-group">
         {onPin && <button onClick={onPin} className="btn-pin">Pin</button>}
         {onDeselect && <button onClick={onDeselect} className="btn-deselect">Deselect</button>}
