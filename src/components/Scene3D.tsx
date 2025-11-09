@@ -4,6 +4,23 @@ import { ReactNode } from 'react'
 import type { ElectrophysiologyPoint } from '../types/electrophysiology'
 import HeartMesh from './HeartMesh'
 import DataPointCloud from './DataPointCloud'
+import {
+  CAMERA_POSITION_Z,
+  CAMERA_FOV,
+  AMBIENT_LIGHT_INTENSITY,
+  MAIN_LIGHT_POSITION,
+  MAIN_LIGHT_INTENSITY,
+  MAIN_LIGHT_COLOR,
+  RIM_LIGHT_POSITION,
+  RIM_LIGHT_INTENSITY,
+  RIM_LIGHT_COLOR,
+  FILL_LIGHT_POSITION,
+  FILL_LIGHT_INTENSITY,
+  FILL_LIGHT_COLOR,
+  ORBIT_MIN_DISTANCE,
+  ORBIT_MAX_DISTANCE,
+  ORBIT_DAMPING_FACTOR,
+} from '../constants/visualization'
 
 /**
  * Props for Scene3D component
@@ -21,33 +38,33 @@ function Scene3D({ children, onSelectPoint, onHoverPoint, selectedPoint, hovered
   return (
     <Canvas
       camera={{
-        position: [0, 0, 8],
-        fov: 50
+        position: [0, 0, CAMERA_POSITION_Z],
+        fov: CAMERA_FOV
       }}
       style={{ width: '100vw', height: '100vh' }}
     >
       {/* Ambient light for overall illumination */}
-      <ambientLight intensity={0.3} />
+      <ambientLight intensity={AMBIENT_LIGHT_INTENSITY} />
 
       {/* Main directional light */}
       <directionalLight
-        position={[5, 5, 5]}
-        intensity={0.8}
-        color="#ffffff"
+        position={MAIN_LIGHT_POSITION}
+        intensity={MAIN_LIGHT_INTENSITY}
+        color={MAIN_LIGHT_COLOR}
       />
 
       {/* Rim light for depth */}
       <directionalLight
-        position={[-3, -3, -5]}
-        intensity={0.4}
-        color="#ff9999"
+        position={RIM_LIGHT_POSITION}
+        intensity={RIM_LIGHT_INTENSITY}
+        color={RIM_LIGHT_COLOR}
       />
 
       {/* Top fill light */}
       <pointLight
-        position={[0, 5, 0]}
-        intensity={0.5}
-        color="#ffcccc"
+        position={FILL_LIGHT_POSITION}
+        intensity={FILL_LIGHT_INTENSITY}
+        color={FILL_LIGHT_COLOR}
       />
 
       {/* OrbitControls for camera manipulation */}
@@ -55,10 +72,10 @@ function Scene3D({ children, onSelectPoint, onHoverPoint, selectedPoint, hovered
         enablePan={true}
         enableZoom={true}
         enableRotate={true}
-        minDistance={3}
-        maxDistance={20}
+        minDistance={ORBIT_MIN_DISTANCE}
+        maxDistance={ORBIT_MAX_DISTANCE}
         enableDamping={true}
-        dampingFactor={0.05}
+        dampingFactor={ORBIT_DAMPING_FACTOR}
       />
 
       {/* Heart mesh - stylized icosahedron */}

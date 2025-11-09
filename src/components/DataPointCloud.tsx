@@ -2,6 +2,24 @@ import { useEffect, useMemo, useState, useRef } from 'react'
 import type { ElectrophysiologyPoint } from '../types/electrophysiology'
 import { generateElectrophysiologyPoint, getIndicatorColorFromIndex } from '../utils/dataGenerator'
 import DataPoint from './DataPoint'
+import {
+  LIVE_POINTS_COUNT,
+  POINTS_UPDATE_INTERVAL_MS,
+  DEFAULT_POINT_SCALE,
+  LIVE_POINT_OPACITY,
+  SELECTED_POINT_SCALE,
+  SELECTED_POINT_OPACITY,
+  PINNED_POINT_SCALE,
+  PINNED_POINT_OPACITY,
+  INDICATOR_RING_RADIUS,
+  INDICATOR_RING_TUBE_RADIUS,
+  INDICATOR_RING_RADIAL_SEGMENTS,
+  INDICATOR_RING_TUBULAR_SEGMENTS,
+  INDICATOR_RING_ROTATION_X,
+  INDICATOR_RING_EMISSIVE_INTENSITY,
+  INDICATOR_RING_METALNESS,
+  INDICATOR_RING_ROUGHNESS,
+} from '../constants/visualization'
 
 /**
  * Props for DataPointCloud component
@@ -25,22 +43,22 @@ function DataPointCloud({ onSelectPoint, onHoverPoint, selectedPoint = null, hov
   const [livePoints, setLivePoints] = useState<ElectrophysiologyPoint[]>([])
   const frameCountRef = useRef<number>(0)
 
-  // Generate 10 points that update positions every second
+  // Generate points that update positions at regular intervals
   useEffect(() => {
-    // Initial generation of 10 points
-    const initialPoints = Array.from({ length: 10 }, (_, i) =>
+    // Initial generation of points
+    const initialPoints = Array.from({ length: LIVE_POINTS_COUNT }, (_, i) =>
       generateElectrophysiologyPoint(i)
     )
     setLivePoints(initialPoints)
 
-    // Update all points every second
+    // Update all points at regular intervals
     const interval = setInterval(() => {
       frameCountRef.current += 1
-      const updatedPoints = Array.from({ length: 10 }, (_, i) =>
-        generateElectrophysiologyPoint(frameCountRef.current * 10 + i)
+      const updatedPoints = Array.from({ length: LIVE_POINTS_COUNT }, (_, i) =>
+        generateElectrophysiologyPoint(frameCountRef.current * LIVE_POINTS_COUNT + i)
       )
       setLivePoints(updatedPoints)
-    }, 1000)
+    }, POINTS_UPDATE_INTERVAL_MS)
 
     return () => clearInterval(interval)
   }, [])
@@ -68,8 +86,8 @@ function DataPointCloud({ onSelectPoint, onHoverPoint, selectedPoint = null, hov
       <DataPoint
         key={`${point.id}-${point.timestamp}`}
         point={point}
-        scale={0.08}
-        opacity={0.8}
+        scale={DEFAULT_POINT_SCALE}
+        opacity={LIVE_POINT_OPACITY}
         onSelect={onSelectPoint}
         onHover={onHoverPoint}
       />
@@ -83,8 +101,8 @@ function DataPointCloud({ onSelectPoint, onHoverPoint, selectedPoint = null, hov
       <DataPoint
         key={`hovered-${hoveredPoint.id}-${hoveredPoint.timestamp}`}
         point={hoveredPoint}
-        scale={0.08}
-        opacity={0.8}
+        scale={DEFAULT_POINT_SCALE}
+        opacity={LIVE_POINT_OPACITY}
         onSelect={onSelectPoint}
         onHover={onHoverPoint}
       />
@@ -98,8 +116,8 @@ function DataPointCloud({ onSelectPoint, onHoverPoint, selectedPoint = null, hov
       <DataPoint
         key={`selected-${selectedPoint.id}-${selectedPoint.timestamp}`}
         point={selectedPoint}
-        scale={0.09}
-        opacity={1.0}
+        scale={SELECTED_POINT_SCALE}
+        opacity={SELECTED_POINT_OPACITY}
         onSelect={onSelectPoint}
       />
     )
@@ -114,23 +132,23 @@ function DataPointCloud({ onSelectPoint, onHoverPoint, selectedPoint = null, hov
           {/* Indicator ring around pinned point */}
           <mesh
             position={[point.position.x, point.position.y, point.position.z]}
-            rotation={[Math.PI / 2, 0, 0]}
+            rotation={[INDICATOR_RING_ROTATION_X, 0, 0]}
           >
-            <torusGeometry args={[0.15, 0.02, 16, 32]} />
+            <torusGeometry args={[INDICATOR_RING_RADIUS, INDICATOR_RING_TUBE_RADIUS, INDICATOR_RING_RADIAL_SEGMENTS, INDICATOR_RING_TUBULAR_SEGMENTS]} />
             <meshStandardMaterial
               color={indicatorColor}
               emissive={indicatorColor}
-              emissiveIntensity={0.8}
-              metalness={0.3}
-              roughness={0.7}
+              emissiveIntensity={INDICATOR_RING_EMISSIVE_INTENSITY}
+              metalness={INDICATOR_RING_METALNESS}
+              roughness={INDICATOR_RING_ROUGHNESS}
             />
           </mesh>
           {/* The pinned point itself */}
           <DataPoint
             key={`pinned-${point.id}-${point.timestamp}`}
             point={point}
-            scale={0.1}
-            opacity={1.0}
+            scale={PINNED_POINT_SCALE}
+            opacity={PINNED_POINT_OPACITY}
             onSelect={onSelectPoint}
           />
         </group>
