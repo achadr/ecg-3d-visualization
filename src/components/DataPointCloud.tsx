@@ -1,7 +1,24 @@
-import { useEffect, useMemo, useState, useRef } from 'react'
+import { useEffect, useMemo } from 'react'
 import type { ElectrophysiologyPoint } from '../types/electrophysiology'
 import { generateElectrophysiologyPoint, getIndicatorColorFromIndex } from '../utils/dataGenerator'
+import useDataStream from '../hooks/useDataStream'
 import DataPoint from './DataPoint'
+import {
+  DEFAULT_POINT_SCALE,
+  LIVE_POINT_OPACITY,
+  SELECTED_POINT_SCALE,
+  SELECTED_POINT_OPACITY,
+  PINNED_POINT_SCALE,
+  PINNED_POINT_OPACITY,
+  INDICATOR_RING_RADIUS,
+  INDICATOR_RING_TUBE_RADIUS,
+  INDICATOR_RING_RADIAL_SEGMENTS,
+  INDICATOR_RING_TUBULAR_SEGMENTS,
+  INDICATOR_RING_ROTATION_X,
+  INDICATOR_RING_EMISSIVE_INTENSITY,
+  INDICATOR_RING_METALNESS,
+  INDICATOR_RING_ROUGHNESS,
+} from '../constants/visualization'
 
 /**
  * Props for DataPointCloud component
@@ -19,31 +36,17 @@ interface DataPointCloudProps {
  * Manages the data stream and renders all active data points
  * Optimized with memoization for better performance
  *
+ * Uses useDataStream hook to separate data logic from rendering
  * Automatically starts streaming on mount
  */
 function DataPointCloud({ onSelectPoint, onHoverPoint, selectedPoint = null, hoveredPoint = null, pinnedPoints = [] }: DataPointCloudProps) {
-  const [livePoints, setLivePoints] = useState<ElectrophysiologyPoint[]>([])
-  const frameCountRef = useRef<number>(0)
+  // Use custom hook for data streaming (separates logic from rendering)
+  const { data: livePoints, startStream } = useDataStream(generateElectrophysiologyPoint)
 
-  // Generate 10 points that update positions every second
+  // Start streaming on mount
   useEffect(() => {
-    // Initial generation of 10 points
-    const initialPoints = Array.from({ length: 10 }, (_, i) =>
-      generateElectrophysiologyPoint(i)
-    )
-    setLivePoints(initialPoints)
-
-    // Update all points every second
-    const interval = setInterval(() => {
-      frameCountRef.current += 1
-      const updatedPoints = Array.from({ length: 10 }, (_, i) =>
-        generateElectrophysiologyPoint(frameCountRef.current * 10 + i)
-      )
-      setLivePoints(updatedPoints)
-    }, 1000)
-
-    return () => clearInterval(interval)
-  }, [])
+    startStream()
+  }, [startStream])
 
   // Filter out selected, hovered, and pinned points from live stream
   // Selected and hovered points are "frozen" and don't update with the stream
@@ -68,8 +71,8 @@ function DataPointCloud({ onSelectPoint, onHoverPoint, selectedPoint = null, hov
       <DataPoint
         key={`${point.id}-${point.timestamp}`}
         point={point}
-        scale={0.08}
-        opacity={0.8}
+        scale={DEFAULT_POINT_SCALE}
+        opacity={LIVE_POINT_OPACITY}
         onSelect={onSelectPoint}
         onHover={onHoverPoint}
       />
@@ -83,8 +86,8 @@ function DataPointCloud({ onSelectPoint, onHoverPoint, selectedPoint = null, hov
       <DataPoint
         key={`hovered-${hoveredPoint.id}-${hoveredPoint.timestamp}`}
         point={hoveredPoint}
-        scale={0.08}
-        opacity={0.8}
+        scale={DEFAULT_POINT_SCALE}
+        opacity={LIVE_POINT_OPACITY}
         onSelect={onSelectPoint}
         onHover={onHoverPoint}
       />
@@ -98,8 +101,8 @@ function DataPointCloud({ onSelectPoint, onHoverPoint, selectedPoint = null, hov
       <DataPoint
         key={`selected-${selectedPoint.id}-${selectedPoint.timestamp}`}
         point={selectedPoint}
-        scale={0.09}
-        opacity={1.0}
+        scale={SELECTED_POINT_SCALE}
+        opacity={SELECTED_POINT_OPACITY}
         onSelect={onSelectPoint}
       />
     )
@@ -114,23 +117,23 @@ function DataPointCloud({ onSelectPoint, onHoverPoint, selectedPoint = null, hov
           {/* Indicator ring around pinned point */}
           <mesh
             position={[point.position.x, point.position.y, point.position.z]}
-            rotation={[Math.PI / 2, 0, 0]}
+            rotation={[INDICATOR_RING_ROTATION_X, 0, 0]}
           >
-            <torusGeometry args={[0.15, 0.02, 16, 32]} />
+            <torusGeometry args={[INDICATOR_RING_RADIUS, INDICATOR_RING_TUBE_RADIUS, INDICATOR_RING_RADIAL_SEGMENTS, INDICATOR_RING_TUBULAR_SEGMENTS]} />
             <meshStandardMaterial
               color={indicatorColor}
               emissive={indicatorColor}
-              emissiveIntensity={0.8}
-              metalness={0.3}
-              roughness={0.7}
+              emissiveIntensity={INDICATOR_RING_EMISSIVE_INTENSITY}
+              metalness={INDICATOR_RING_METALNESS}
+              roughness={INDICATOR_RING_ROUGHNESS}
             />
           </mesh>
           {/* The pinned point itself */}
           <DataPoint
             key={`pinned-${point.id}-${point.timestamp}`}
             point={point}
-            scale={0.1}
-            opacity={1.0}
+            scale={PINNED_POINT_SCALE}
+            opacity={PINNED_POINT_OPACITY}
             onSelect={onSelectPoint}
           />
         </group>

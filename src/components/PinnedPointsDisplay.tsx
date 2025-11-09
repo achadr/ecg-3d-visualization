@@ -1,6 +1,11 @@
 import type { ElectrophysiologyPoint } from '../types/electrophysiology'
 import { getIndicatorColorFromIndex } from '../utils/dataGenerator'
+import PointDataDisplay from './PointDataDisplay'
 import './PinnedPointsDisplay.css'
+import {
+  PINNED_PANEL_TOP_OFFSET_PX,
+  PINNED_PANEL_VERTICAL_SPACING_PX,
+} from '../constants/visualization'
 
 /**
  * Props for PinnedPointsDisplay component
@@ -27,31 +32,12 @@ function PinnedPointsDisplay({ pinnedPoints, onUnpin }: PinnedPointsDisplayProps
             key={`pinned-panel-${point.id}-${point.timestamp}`}
             className="pinned-panel"
             style={{
-              top: `${20 + index * 220}px`,
+              top: `${PINNED_PANEL_TOP_OFFSET_PX + index * PINNED_PANEL_VERTICAL_SPACING_PX}px`,
               borderColor: indicatorColor
             }}
           >
             <h3 style={{ color: indicatorColor, borderBottomColor: indicatorColor }}>Pinned #{point.id}</h3>
-            <div className="coord-row">
-              <span className="label" style={{ color: indicatorColor }}>Type:</span>
-              <span className="value">{point.type}</span>
-            </div>
-            <div className="coord-row">
-              <span className="label" style={{ color: indicatorColor }}>Voltage:</span>
-              <span className="value">{point.voltage.toFixed(2)} mV</span>
-            </div>
-            <div className="coord-row">
-              <span className="label" style={{ color: indicatorColor }}>x:</span>
-              <span className="value">{point.position.x.toFixed(2)}</span>
-            </div>
-            <div className="coord-row">
-              <span className="label" style={{ color: indicatorColor }}>y:</span>
-              <span className="value">{point.position.y.toFixed(2)}</span>
-            </div>
-            <div className="coord-row">
-              <span className="label" style={{ color: indicatorColor }}>z:</span>
-              <span className="value">{point.position.z.toFixed(2)}</span>
-            </div>
+            <PointDataDisplay point={point} labelColor={indicatorColor} />
             <div className="button-group">
               <button
                 className="btn-unpin"

@@ -1,4 +1,5 @@
 import type { ElectrophysiologyPoint } from '../types/electrophysiology'
+import PointDataDisplay from './PointDataDisplay'
 import './CoordinatesDisplay.css'
 
 interface CoordinatesDisplayProps {
@@ -22,26 +23,7 @@ function CoordinatesDisplay({ point, onPin, onDeselect }: CoordinatesDisplayProp
   return (
     <div className="coordinates-panel">
       <h3>Point #{point.id}</h3>
-      <div className="coord-row">
-        <span className="label">Type:</span>
-        <span className="value">{point.type}</span>
-      </div>
-      <div className="coord-row">
-        <span className="label">Voltage:</span>
-        <span className="value">{point.voltage.toFixed(2)} mV</span>
-      </div>
-      <div className="coord-row">
-        <span className="label">x:</span>
-        <span className="value">{point.position.x.toFixed(2)}</span>
-      </div>
-      <div className="coord-row">
-        <span className="label">y:</span>
-        <span className="value">{point.position.y.toFixed(2)}</span>
-      </div>
-      <div className="coord-row">
-        <span className="label">z:</span>
-        <span className="value">{point.position.z.toFixed(2)}</span>
-      </div>
+      <PointDataDisplay point={point} />
       <div className="button-group">
         {onPin && <button onClick={onPin} className="btn-pin">Pin</button>}
         {onDeselect && <button onClick={onDeselect} className="btn-deselect">Deselect</button>}

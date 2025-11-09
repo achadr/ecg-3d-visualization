@@ -3,6 +3,19 @@ import { useFrame, type ThreeEvent } from '@react-three/fiber'
 import type { Mesh, MeshStandardMaterial } from 'three'
 import type { ElectrophysiologyPoint } from '../types/electrophysiology'
 import { getColorFromVoltage } from '../utils/dataGenerator'
+import {
+  DEFAULT_POINT_SCALE,
+  DEFAULT_POINT_OPACITY,
+  SPHERE_GEOMETRY_WIDTH_SEGMENTS,
+  SPHERE_GEOMETRY_HEIGHT_SEGMENTS,
+  HOVER_COLOR,
+  HOVER_EMISSIVE_INTENSITY,
+  DEFAULT_EMISSIVE_INTENSITY,
+  POINT_MATERIAL_METALNESS,
+  POINT_MATERIAL_ROUGHNESS,
+  ANIMATION_SPEED_MULTIPLIER,
+  EASE_OUT_POWER,
+} from '../constants/visualization'
 
 /**
  * Props for DataPoint component
@@ -27,7 +40,7 @@ interface DataPointProps {
  * @param opacity - Sphere opacity (default: 0.9)
  * @param onSelect - Optional callback when point is clicked
  */
-function DataPoint({ point, scale = 0.08, opacity = 0.9, onSelect, onHover }: DataPointProps) {
+function DataPoint({ point, scale = DEFAULT_POINT_SCALE, opacity = DEFAULT_POINT_OPACITY, onSelect, onHover }: DataPointProps) {
   const meshRef = useRef<Mesh>(null)
   const materialRef = useRef<MeshStandardMaterial>(null)
   const animationProgress = useRef<number>(0)
@@ -63,12 +76,12 @@ function DataPoint({ point, scale = 0.08, opacity = 0.9, onSelect, onHover }: Da
   }, [point.voltage])
 
   // Shared geometry to reduce memory usage
-  const geometry = useMemo(() => [scale, 16, 16] as const, [scale])
+  const geometry = useMemo(() => [scale, SPHERE_GEOMETRY_WIDTH_SEGMENTS, SPHERE_GEOMETRY_HEIGHT_SEGMENTS] as const, [scale])
 
   // Animate fade-in and scale on mount
   useFrame((_state, delta) => {
     if (animationProgress.current < 1) {
-      animationProgress.current += delta * 3 // Animation speed
+      animationProgress.current += delta * ANIMATION_SPEED_MULTIPLIER // Animation speed
 
       if (animationProgress.current > 1) {
         animationProgress.current = 1
@@ -81,7 +94,7 @@ function DataPoint({ point, scale = 0.08, opacity = 0.9, onSelect, onHover }: Da
 
       // Smooth scale-in with ease-out
       if (meshRef.current) {
-        const easeOut = 1 - Math.pow(1 - animationProgress.current, 3)
+        const easeOut = 1 - Math.pow(1 - animationProgress.current, EASE_OUT_POWER)
         meshRef.current.scale.setScalar(easeOut)
       }
     }
@@ -98,13 +111,13 @@ function DataPoint({ point, scale = 0.08, opacity = 0.9, onSelect, onHover }: Da
       <sphereGeometry args={geometry} />
       <meshStandardMaterial
         ref={materialRef}
-        color={hovered ? '#00ff00' : color}
+        color={hovered ? HOVER_COLOR : color}
         transparent={true}
         opacity={0}
-        emissive={hovered ? '#00ff00' : color}
-        emissiveIntensity={hovered ? 0.8 : 0.4}
-        metalness={0}
-        roughness={1}
+        emissive={hovered ? HOVER_COLOR : color}
+        emissiveIntensity={hovered ? HOVER_EMISSIVE_INTENSITY : DEFAULT_EMISSIVE_INTENSITY}
+        metalness={POINT_MATERIAL_METALNESS}
+        roughness={POINT_MATERIAL_ROUGHNESS}
       />
     </mesh>
   )

@@ -12,6 +12,34 @@ import type {
   Point3D,
   ColorValue
 } from '../types/electrophysiology'
+import {
+  VOLTAGE_THRESHOLD_SCAR,
+  VOLTAGE_THRESHOLD_BORDER,
+  VOLTAGE_HEALTHY_MIN,
+  VOLTAGE_HEALTHY_RANGE,
+  VOLTAGE_BORDER_MIN,
+  VOLTAGE_BORDER_MULTIPLIER,
+  VOLTAGE_SCAR_MAX,
+  TISSUE_HEALTHY_PROBABILITY,
+  TISSUE_BORDER_PROBABILITY,
+  PSEUDO_RANDOM_SEED_MULTIPLIER,
+  HEART_FULL_ROTATION,
+  HEART_HEIGHT_RANGE,
+  HEART_HEIGHT_OFFSET,
+  HEART_DEPTH_MULTIPLIER,
+  HEART_DEPTH_CENTER_OFFSET,
+  HEART_MIN_HEIGHT_FACTOR,
+  HEART_HEIGHT_DIVISOR,
+  HEART_BASE_RADIUS,
+  HEART_X_SHIFT,
+  HEART_X_CENTER_OFFSET,
+  HEART_Z_RADIUS_MULTIPLIER,
+  HEART_Y_SHIFT,
+  COLOR_SCAR,
+  COLOR_BORDER,
+  COLOR_HEALTHY,
+  INDICATOR_COLOR_PALETTE,
+} from '../constants/electrophysiologyConfig'
 
 /**
  * Generates a random point on the surface of a heart-shaped geometry
@@ -23,7 +51,7 @@ import type {
 function generateHeartSurfacePosition(seed: number): Point3D {
   // Use seed for reproducible randomness
   const pseudoRandom = (s: number): number => {
-    const x = Math.sin(s) * 10000
+    const x = Math.sin(s) * PSEUDO_RANDOM_SEED_MULTIPLIER
     return x - Math.floor(x)
   }
 
@@ -34,19 +62,19 @@ function generateHeartSurfacePosition(seed: number): Point3D {
   const w = pseudoRandom(seed + 2)
 
   // Use cylindrical-like distribution that matches heart shape better
-  const angle = u * Math.PI * 2 // Full rotation around Y axis
-  const height = v * 1.8 - 0.9 // Vertical distribution (-0.9 to 0.9)
-  const depth = (w - 0.5) * 0.4 // Reduced depth variation (-0.2 to 0.2)
+  const angle = u * HEART_FULL_ROTATION // Full rotation around Y axis
+  const height = v * HEART_HEIGHT_RANGE + HEART_HEIGHT_OFFSET // Vertical distribution (-0.9 to 0.9)
+  const depth = (w - HEART_DEPTH_CENTER_OFFSET) * HEART_DEPTH_MULTIPLIER // Reduced depth variation (-0.2 to 0.2)
 
   // Base radius that varies with height (wider at top, narrower at bottom)
-  const heightFactor = Math.max(0.3, 1 - Math.abs(height) / 1.5)
-  const radius = 0.8 * heightFactor
+  const heightFactor = Math.max(HEART_MIN_HEIGHT_FACTOR, 1 - Math.abs(height) / HEART_HEIGHT_DIVISOR)
+  const radius = HEART_BASE_RADIUS * heightFactor
 
   // Calculate x and z from angle and radius
   // Heart mesh is rotated 180° around Z axis and positioned at (0, -0.5, 0)
-  const x = -(radius * Math.cos(angle) - 0.5) - 1.0 // Shift more left
-  const z = depth + radius * 0.2 * Math.sin(angle) // Reduced Z variation
-  const y = height - 1.2 // Shift more down
+  const x = -(radius * Math.cos(angle) - HEART_X_CENTER_OFFSET) + HEART_X_SHIFT // Shift more left
+  const z = depth + radius * HEART_Z_RADIUS_MULTIPLIER * Math.sin(angle) // Reduced Z variation
+  const y = height + HEART_Y_SHIFT // Shift more down
 
   return { x, y, z }
 }
@@ -64,16 +92,31 @@ function generateVoltage(seed: number): number {
   const random = Math.sin(seed * 0.1) * 0.5 + 0.5 // 0-1 range
 
   // 70% healthy, 20% border zone, 10% scar
-  if (random < 0.7) {
+  if (random < TISSUE_HEALTHY_PROBABILITY) {
     // Healthy tissue
-    return 1.5 + random * 3.5
-  } else if (random < 0.9) {
+    return VOLTAGE_HEALTHY_MIN + random * VOLTAGE_HEALTHY_RANGE
+  } else if (random < TISSUE_BORDER_PROBABILITY) {
     // Border zone
-    return 0.5 + (random - 0.7) * 5
+    return VOLTAGE_BORDER_MIN + (random - TISSUE_HEALTHY_PROBABILITY) * VOLTAGE_BORDER_MULTIPLIER
   } else {
     // Scar tissue (strictly < 0.5)
-    return random * 0.49
+    return random * VOLTAGE_SCAR_MAX
   }
+}
+
+/**
+ * Classifies tissue type based on voltage measurement
+ *
+ * @param voltage - Voltage in millivolts
+ * @returns Tissue type classification
+ */
+export function classifyTissueType(voltage: number): TissueType {
+  if (voltage < VOLTAGE_THRESHOLD_SCAR) {
+    return 'scar'
+  } else if (voltage < VOLTAGE_THRESHOLD_BORDER) {
+    return 'border'
+  }
+  return 'healthy'
 }
 
 /**
@@ -87,14 +130,7 @@ export function generateElectrophysiologyPoint(frameCount: number): Electrophysi
   const timestamp = Date.now()
   const position = generateHeartSurfacePosition(frameCount)
   const voltage = generateVoltage(frameCount)
-
-  // Classify tissue type based on voltage
-  let type: TissueType = 'healthy'
-  if (voltage < 0.5) {
-    type = 'scar'
-  } else if (voltage < 1.5) {
-    type = 'border'
-  }
+  const type = classifyTissueType(voltage)
 
   return {
     id: String(frameCount),
@@ -129,15 +165,15 @@ export function generateBatch(count: number, startIndex: number = 0): Electrophy
  * @returns Hex color code
  */
 export function getColorFromVoltage(voltage: number): ColorValue {
-  if (voltage < 0.5) {
+  if (voltage < VOLTAGE_THRESHOLD_SCAR) {
     // Scar - Red
-    return '#ff0000'
-  } else if (voltage < 1.5) {
+    return COLOR_SCAR
+  } else if (voltage < VOLTAGE_THRESHOLD_BORDER) {
     // Border zone - Yellow/Orange
-    return '#ffaa00'
+    return COLOR_BORDER
   } else {
     // Healthy - Purple/Blue
-    return '#8844ff'
+    return COLOR_HEALTHY
   }
 }
 
@@ -148,23 +184,9 @@ export function getColorFromVoltage(voltage: number): ColorValue {
  * @param index - Index of the pinned point (0, 1, 2, ...)
  * @returns Hex color code for the indicator ring
  */
-export function getIndicatorColorFromIndex(index: number): ColorValue {
-  // Palette of 10 vibrant, highly distinguishable colors
-  const colorPalette: ColorValue[] = [
-    '#00ffff', // Cyan
-    '#ff00ff', // Magenta
-    '#ffff00', // Yellow
-    '#00ff00', // Lime green
-    '#ff6600', // Orange
-    '#0099ff', // Sky blue
-    '#ff0099', // Hot pink
-    '#66ff00', // Chartreuse
-    '#9900ff', // Purple
-    '#ff3333', // Red
-  ]
-
+export function getIndicatorColorFromIndex(index: number): string {
   // Cycle through the palette if more than 10 points are pinned
-  return colorPalette[index % colorPalette.length]
+  return INDICATOR_COLOR_PALETTE[index % INDICATOR_COLOR_PALETTE.length]
 }
 
 export default generateElectrophysiologyPoint
