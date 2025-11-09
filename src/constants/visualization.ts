@@ -50,7 +50,7 @@ export const POINT_MATERIAL_ROUGHNESS = 1
 export const ANIMATION_SPEED_MULTIPLIER = 3
 export const EASE_OUT_POWER = 3
 
-// === DataPointCloud Configuration ===
+// === UseDataStream Configuration ===
 export const LIVE_POINTS_COUNT = 10
 export const POINTS_UPDATE_INTERVAL_MS = 1000
 

@@ -2,7 +2,9 @@ import { describe, it, expect } from 'vitest'
 import {
   generateElectrophysiologyPoint,
   generateBatch,
-  getColorFromVoltage
+  getColorFromVoltage,
+  classifyTissueType,
+  getIndicatorColorFromIndex
 } from '../utils/dataGenerator'
 
 describe('dataGenerator', () => {
@@ -130,6 +132,31 @@ describe('dataGenerator', () => {
     })
   })
 
+  describe('classifyTissueType', () => {
+    it('should classify scar tissue for voltage < 0.5 mV', () => {
+      expect(classifyTissueType(0.0)).toBe('scar')
+      expect(classifyTissueType(0.3)).toBe('scar')
+      expect(classifyTissueType(0.49)).toBe('scar')
+    })
+
+    it('should classify border zone for voltage 0.5 - 1.5 mV', () => {
+      expect(classifyTissueType(0.5)).toBe('border')
+      expect(classifyTissueType(1.0)).toBe('border')
+      expect(classifyTissueType(1.49)).toBe('border')
+    })
+
+    it('should classify healthy tissue for voltage >= 1.5 mV', () => {
+      expect(classifyTissueType(1.5)).toBe('healthy')
+      expect(classifyTissueType(3.0)).toBe('healthy')
+      expect(classifyTissueType(5.0)).toBe('healthy')
+    })
+
+    it('should handle boundary values correctly', () => {
+      expect(classifyTissueType(0.5)).toBe('border') // Exactly at scar threshold
+      expect(classifyTissueType(1.5)).toBe('healthy') // Exactly at border threshold
+    })
+  })
+
   describe('getColorFromVoltage', () => {
     it('should return red for scar tissue (< 0.5 mV)', () => {
       expect(getColorFromVoltage(0.0)).toBe('#ff0000')
@@ -147,6 +174,47 @@ describe('dataGenerator', () => {
       expect(getColorFromVoltage(1.5)).toBe('#8844ff')
       expect(getColorFromVoltage(3.0)).toBe('#8844ff')
       expect(getColorFromVoltage(5.0)).toBe('#8844ff')
+    })
+  })
+
+  describe('getIndicatorColorFromIndex', () => {
+    it('should return colors from palette for indices 0-9', () => {
+      expect(getIndicatorColorFromIndex(0)).toBe('#00ffff') // Cyan
+      expect(getIndicatorColorFromIndex(1)).toBe('#ff00ff') // Magenta
+      expect(getIndicatorColorFromIndex(2)).toBe('#ffff00') // Yellow
+      expect(getIndicatorColorFromIndex(3)).toBe('#00ff00') // Lime green
+      expect(getIndicatorColorFromIndex(4)).toBe('#ff6600') // Orange
+      expect(getIndicatorColorFromIndex(5)).toBe('#0099ff') // Sky blue
+      expect(getIndicatorColorFromIndex(6)).toBe('#ff0099') // Hot pink
+      expect(getIndicatorColorFromIndex(7)).toBe('#66ff00') // Chartreuse
+      expect(getIndicatorColorFromIndex(8)).toBe('#9900ff') // Purple
+      expect(getIndicatorColorFromIndex(9)).toBe('#ff3333') // Red
+    })
+
+    it('should cycle through palette for indices beyond 9', () => {
+      // Index 10 should wrap to index 0
+      expect(getIndicatorColorFromIndex(10)).toBe('#00ffff')
+      expect(getIndicatorColorFromIndex(11)).toBe('#ff00ff')
+
+      // Index 20 should also wrap to index 0
+      expect(getIndicatorColorFromIndex(20)).toBe('#00ffff')
+
+      // Index 25 should wrap to index 5
+      expect(getIndicatorColorFromIndex(25)).toBe('#0099ff')
+    })
+
+    it('should handle large indices correctly', () => {
+      // 100 % 10 = 0
+      expect(getIndicatorColorFromIndex(100)).toBe('#00ffff')
+
+      // 123 % 10 = 3
+      expect(getIndicatorColorFromIndex(123)).toBe('#00ff00')
+    })
+
+    it('should return consistent colors for same index', () => {
+      const color1 = getIndicatorColorFromIndex(5)
+      const color2 = getIndicatorColorFromIndex(5)
+      expect(color1).toBe(color2)
     })
   })
 })

@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import type { ElectrophysiologyPoint, PointGenerator } from '../types/electrophysiology'
 import {
-  DEFAULT_STREAM_INTERVAL_MS,
-  DEFAULT_MAX_POINTS,
+  POINTS_UPDATE_INTERVAL_MS,
+  LIVE_POINTS_COUNT,
 } from '../constants/visualization'
 
 /**
@@ -17,20 +17,19 @@ interface UseDataStreamReturn {
 }
 
 /**
- * Custom hook to simulate real-time data streaming
- * Manages streaming state, data accumulation, and cleanup
- *
- * Written using TDD approach - tests written first
+ * Custom hook to manage real-time batch data streaming
+ * Generates multiple points per interval and replaces the entire batch
+ * Separates data generation logic from rendering components
  *
  * @param dataGenerator - Function that generates data points
- * @param interval - Interval in ms between data generations (default: 1000ms)
- * @param maxPoints - Maximum number of points to keep in memory (default: 1000)
+ * @param interval - Interval in ms between batch generations (default: 1000ms)
+ * @param batchSize - Number of points to generate per interval (default: 10)
  * @returns Object with data, streaming state, and control functions
  */
 function useDataStream(
   dataGenerator: PointGenerator,
-  interval: number = DEFAULT_STREAM_INTERVAL_MS,
-  maxPoints: number = DEFAULT_MAX_POINTS
+  interval: number = POINTS_UPDATE_INTERVAL_MS,
+  batchSize: number = LIVE_POINTS_COUNT
 ): UseDataStreamReturn {
   const [data, setData] = useState<ElectrophysiologyPoint[]>([])
   const [isStreaming, setIsStreaming] = useState<boolean>(false)
@@ -48,25 +47,22 @@ function useDataStream(
   const startStream = useCallback(() => {
     if (isStreaming) return
 
+    // Generate initial batch
+    const initialBatch = Array.from({ length: batchSize }, (_, i) =>
+      dataGenerator(i)
+    )
+    setData(initialBatch)
     setIsStreaming(true)
 
+    // Update batch at regular intervals
     intervalRef.current = setInterval(() => {
-      const newPoint = dataGenerator(frameCountRef.current)
-
-      setData((prevData) => {
-        const updatedData = [...prevData, newPoint]
-
-        // Keep only the most recent maxPoints
-        if (updatedData.length > maxPoints) {
-          return updatedData.slice(-maxPoints)
-        }
-
-        return updatedData
-      })
-
       frameCountRef.current += 1
+      const newBatch = Array.from({ length: batchSize }, (_, i) =>
+        dataGenerator(frameCountRef.current * batchSize + i)
+      )
+      setData(newBatch)
     }, interval)
-  }, [dataGenerator, interval, maxPoints, isStreaming])
+  }, [dataGenerator, interval, batchSize, isStreaming])
 
   const clearData = useCallback(() => {
     stopStream()

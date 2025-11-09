@@ -1,10 +1,9 @@
-import { useEffect, useMemo, useState, useRef } from 'react'
+import { useEffect, useMemo } from 'react'
 import type { ElectrophysiologyPoint } from '../types/electrophysiology'
 import { generateElectrophysiologyPoint, getIndicatorColorFromIndex } from '../utils/dataGenerator'
+import useDataStream from '../hooks/useDataStream'
 import DataPoint from './DataPoint'
 import {
-  LIVE_POINTS_COUNT,
-  POINTS_UPDATE_INTERVAL_MS,
   DEFAULT_POINT_SCALE,
   LIVE_POINT_OPACITY,
   SELECTED_POINT_SCALE,
@@ -37,31 +36,17 @@ interface DataPointCloudProps {
  * Manages the data stream and renders all active data points
  * Optimized with memoization for better performance
  *
+ * Uses useDataStream hook to separate data logic from rendering
  * Automatically starts streaming on mount
  */
 function DataPointCloud({ onSelectPoint, onHoverPoint, selectedPoint = null, hoveredPoint = null, pinnedPoints = [] }: DataPointCloudProps) {
-  const [livePoints, setLivePoints] = useState<ElectrophysiologyPoint[]>([])
-  const frameCountRef = useRef<number>(0)
+  // Use custom hook for data streaming (separates logic from rendering)
+  const { data: livePoints, startStream } = useDataStream(generateElectrophysiologyPoint)
 
-  // Generate points that update positions at regular intervals
+  // Start streaming on mount
   useEffect(() => {
-    // Initial generation of points
-    const initialPoints = Array.from({ length: LIVE_POINTS_COUNT }, (_, i) =>
-      generateElectrophysiologyPoint(i)
-    )
-    setLivePoints(initialPoints)
-
-    // Update all points at regular intervals
-    const interval = setInterval(() => {
-      frameCountRef.current += 1
-      const updatedPoints = Array.from({ length: LIVE_POINTS_COUNT }, (_, i) =>
-        generateElectrophysiologyPoint(frameCountRef.current * LIVE_POINTS_COUNT + i)
-      )
-      setLivePoints(updatedPoints)
-    }, POINTS_UPDATE_INTERVAL_MS)
-
-    return () => clearInterval(interval)
-  }, [])
+    startStream()
+  }, [startStream])
 
   // Filter out selected, hovered, and pinned points from live stream
   // Selected and hovered points are "frozen" and don't update with the stream
