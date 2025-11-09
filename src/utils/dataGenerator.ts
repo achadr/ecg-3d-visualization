@@ -105,6 +105,21 @@ function generateVoltage(seed: number): number {
 }
 
 /**
+ * Classifies tissue type based on voltage measurement
+ *
+ * @param voltage - Voltage in millivolts
+ * @returns Tissue type classification
+ */
+export function classifyTissueType(voltage: number): TissueType {
+  if (voltage < VOLTAGE_THRESHOLD_SCAR) {
+    return 'scar'
+  } else if (voltage < VOLTAGE_THRESHOLD_BORDER) {
+    return 'border'
+  }
+  return 'healthy'
+}
+
+/**
  * Main data generator function
  * Creates a complete electrophysiology data point
  *
@@ -115,14 +130,7 @@ export function generateElectrophysiologyPoint(frameCount: number): Electrophysi
   const timestamp = Date.now()
   const position = generateHeartSurfacePosition(frameCount)
   const voltage = generateVoltage(frameCount)
-
-  // Classify tissue type based on voltage
-  let type: TissueType = 'healthy'
-  if (voltage < VOLTAGE_THRESHOLD_SCAR) {
-    type = 'scar'
-  } else if (voltage < VOLTAGE_THRESHOLD_BORDER) {
-    type = 'border'
-  }
+  const type = classifyTissueType(voltage)
 
   return {
     id: String(frameCount),
