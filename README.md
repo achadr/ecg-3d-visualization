@@ -227,11 +227,30 @@ Implémentation du système freeze-on-hover pour faciliter la sélection.
 **Hovered**
 Point temporairement gelé au moment du hover de la souris (onHover state).
 
+1. Souris entre sur point
+
+2. Point devient vert et brillant
+
+3. Point retiré du stream live
+
+4. Point figé (ne bouge plus)
+
+5. Cliquable facilement
+
+6. Souris sort → Point retourne dans le stream
+
 **Selected**
 Point sélectionné persistant jusqu'à nouvelle sélection ou déselection manuelle.
 
 **Pinned**
 Points épinglés permanents avec indicateurs visuels uniques et panneaux UI dédiés.
+
+| État | Comportement | Visuel |
+|------|-------------|--------|
+| **Live** (par défaut) | Bouge toutes les secondes | Couleur basée sur voltage |
+| **Hovered** | FIGÉ au hover de la souris | Vert + brillant |
+| **Selected** | FIGÉ après clic | Un peu plus grand et opaque|
+| **Pinned** | FIGÉ avec anneau 3D | Ajout d'un anneau 3D coloré |
 
 ## Système d'Indicateurs Visuels
 
