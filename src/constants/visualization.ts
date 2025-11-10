@@ -51,7 +51,7 @@ export const ANIMATION_SPEED_MULTIPLIER = 3
 export const EASE_OUT_POWER = 3
 
 // === UseDataStream Configuration ===
-export const LIVE_POINTS_COUNT = 10
+export const LIVE_POINTS_COUNT = 100
 export const POINTS_UPDATE_INTERVAL_MS = 1000
 
 // === Pinned Point Indicator Ring Configuration ===
@@ -68,15 +68,15 @@ export const INDICATOR_RING_ROUGHNESS = 0.7
 export const HEART_MESH_POSITION = [0, -0.5, 0] as const
 export const HEART_MESH_ROTATION_Z = Math.PI
 
-export const HEART_EXTRUDE_DEPTH = 1.2
+export const HEART_EXTRUDE_DEPTH = 0.7
 export const HEART_BEVEL_SEGMENTS = 3
 export const HEART_EXTRUDE_STEPS = 4
-export const HEART_BEVEL_SIZE = 0.2
+export const HEART_BEVEL_SIZE = 0.3
 export const HEART_BEVEL_THICKNESS = 0.2
 export const HEART_CURVE_SEGMENTS = 16
 
 export const HEART_MESH_COLOR = '#ff4d4d'
-export const HEART_MESH_EMISSIVE_COLOR = '#ff1a1a'
+export const HEART_MESH_EMISSIVE_COLOR = '#f2594e'
 export const HEART_MESH_EMISSIVE_INTENSITY = 0.3
 export const HEART_MESH_METALNESS = 0
 export const HEART_MESH_ROUGHNESS = 1

@@ -30,15 +30,15 @@ export const HEART_DEPTH_UNITS = 1.2
 
 // Cylindrical distribution parameters
 export const HEART_FULL_ROTATION = Math.PI * 2
-export const HEART_HEIGHT_RANGE = 1.8
-export const HEART_HEIGHT_OFFSET = -0.9
-export const HEART_DEPTH_MULTIPLIER = 0.4
-export const HEART_DEPTH_CENTER_OFFSET = 0.5
+export const HEART_HEIGHT_RANGE = 1.7
+export const HEART_HEIGHT_OFFSET = -1
+export const HEART_DEPTH_MULTIPLIER = 0.8
+export const HEART_DEPTH_CENTER_OFFSET = 0
 
 // Radius calculation parameters
 export const HEART_MIN_HEIGHT_FACTOR = 0.3
 export const HEART_HEIGHT_DIVISOR = 1.5
-export const HEART_BASE_RADIUS = 0.8
+export const HEART_BASE_RADIUS = 1.4
 
 // Position adjustment parameters
 export const HEART_X_SHIFT = -1.0

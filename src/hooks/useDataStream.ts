@@ -23,7 +23,7 @@ interface UseDataStreamReturn {
  *
  * @param dataGenerator - Function that generates data points
  * @param interval - Interval in ms between batch generations (default: 1000ms)
- * @param batchSize - Number of points to generate per interval (default: 10)
+ * @param batchSize - Number of points to generate per interval (default: 100
  * @returns Object with data, streaming state, and control functions
  */
 function useDataStream(

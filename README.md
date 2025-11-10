@@ -11,7 +11,7 @@
 - Vitest 4.0.7
 - React Testing Library 16.3.0
 - Happy-DOM 20.0.10
-- 53 tests unitaires avec couverture complète
+- 53 tests unitaires
 
 ## Architecture
 
