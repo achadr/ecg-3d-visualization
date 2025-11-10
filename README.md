@@ -220,7 +220,7 @@ Ajustements itératifs du générateur pour alignement avec le modèle 3D du coe
 ### Sélection de Points en Mouvement
 Implémentation du système freeze-on-hover pour faciliter la sélection.
 
-## Structure de l'État
+## Structure de l'État (React State)
 
 ### Trois Niveaux de Points
 
