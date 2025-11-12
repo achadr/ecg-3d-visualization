@@ -117,8 +117,8 @@ Aussi le framework frontend où je suis le plus à l'aise.
 La bibliothèque Three.js est mature, auditée, et offre toutes les primitives nécessaires : gestion des maillages et surtout des performances temps réel.
 
 
-#### React Three JS #####
-React Three JS est un pont déclaratif entre React et Three.js, la bibliotheque adopte une approche déclarative avec gestion automatique de la mémoire et render loop.
+#### React Three Fiber #####
+React Three Fiber est un pont déclaratif entre React et Three.js, la bibliotheque adopte une approche déclarative avec gestion automatique de la mémoire et render loop.
 
 S'intègre naturellement avec l'écosystème React basé sur les composants TSX, permettant de construire des scènes 3D avec la même logique que les interfaces UI React.
 
