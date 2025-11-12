@@ -103,14 +103,26 @@ npm test             # Exécution des tests
 
 ## Décisions Techniques
 
+J'ai choisi une stack moderne: React + Three.js via React Three Fiber. Cette combinaison est le standard pour les applications 3D car elle allie performance temps réel et fiabilité.
+
 ### React 19
 Version stable récente avec fonctionnalités optimisées pour le rendu 3D.
 
-Aussi le framework frontend où je suis le plus à l'aise
+J'ai choisi React car c'est un echosystem mature. Les Hooks permettent d'isoler la logique métier du rendu, ce qui facilite les tests unitaires. De plus, l'écosystème React Three Fiber offre une intégration Three.js optimale, ce qui essentiel pour les performances temps réel.
+
+Aussi le framework frontend où je suis le plus à l'aise.
 
 ### Three.js + React Three Fiber
-Approche déclarative avec gestion automatique de la mémoire et render loop.
+#### Three.js ####
+La bibliothèque Three.js est mature, auditée, et offre toutes les primitives nécessaires : gestion des maillages et surtout des performances temps réel.
+
+
+#### React Three JS #####
+React Three JS est un pont déclaratif entre React et Three.js, la bibliotheque adopte une approche déclarative avec gestion automatique de la mémoire et render loop.
+
 S'intègre naturellement avec l'écosystème React basé sur les composants TSX, permettant de construire des scènes 3D avec la même logique que les interfaces UI React.
+
+React Three Fiber transforme Three.js en composants React déclaratifs. Plutôt que de manipuler impérativement la scène, on déclare ce qu'on veut et R3F gère le reste. Le gros avantage : la gestion automatique de la mémoire. De plus, R3F n'a qu'un seul render loop pour toute l'application, ce qui optimise les performances.
 
 #### Approche Hybride : Trois Méthodes
 
@@ -120,7 +132,7 @@ Manipulation directe des objets 3D.
 - Inconvénients : gestion mémoire manuelle
 
 **2. React Three Fiber (Déclaratif)**
-Syntaxe JSX déclarative.
+
 - Avantages : Gestion automatique de la mémoire, synchronisation Automatique avec React quand les props changent ou quand le composant est unmounted, intégration avec l'Écosystème React (hooks).
 - Inconvénients : Difficile pour géométries complexes
 
@@ -174,7 +186,8 @@ Modification du code → Mise à jour instantanée du module modifié uniquement
 En développement : Le Hot Module Replacement instantané me permet d'ajuster les positions, couleurs et animations avec un feedback en quelques ms à l'écran. Pas besoin de rebuild complet à chaque modification
 
 ### Vitest + Happy-DOM
-Framework de test natif Vite avec environnement DOM léger et rapide.
+Framework de test natif Vite avec environnement DOM léger et rapide,  il s'intègre parfaitement avec Vite avec une onfiguration minimale et API identique à Jest.
+
 
 ## Refactoring
 
