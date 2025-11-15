@@ -10,7 +10,6 @@ interface ECGDisplayProps {
   onStart: () => void;
   onStop: () => void;
   onReset: () => void;
-  bufferSize: number;
   maxBufferSize: number;
 }
 
@@ -21,9 +20,9 @@ export const ECGDisplay: React.FC<ECGDisplayProps> = ({
   onStart,
   onStop,
   onReset,
-  bufferSize,
   maxBufferSize
 }) => {
+  const bufferSize = buffer.length;
   return (
     <div style={{
       position: 'fixed',

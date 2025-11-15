@@ -66,7 +66,6 @@ function App() {
         onStart={ecgStartStreaming}
         onStop={ecgStopStreaming}
         onReset={ecgResetStream}
-        bufferSize={ecgBuffer.length}
         maxBufferSize={streamConfig.bufferMaxSize}
       />
       <CoordinatesDisplay

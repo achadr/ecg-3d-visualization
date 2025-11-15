@@ -1,5 +1,5 @@
 // Base configuration
-const SAMPLING_RATE =500;              // Hz
+const SAMPLING_RATE = 500;              // Hz
 const BATCH_INTERVAL = 100;             // ms
 const BUFFER_MAX_DURATION = 2;          // seconds
 
@@ -14,8 +14,6 @@ export const ECG_STREAMING_CONFIG = {
   BUFFER_MAX_DURATION,
   // Auto-calculated based on duration and sampling rate
   BUFFER_MAX_SIZE: BUFFER_MAX_DURATION * SAMPLING_RATE,  // 2s * 500Hz = 1000 points
-
-
 } as const;
 
 export const ECG_CHART_CONFIG = {
