@@ -16,7 +16,8 @@
     "@react-three/fiber": "^9.4.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "three": "^0.181.0"
+    "three": "^0.181.0",
+    "uplot": "^1.6.32"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",
