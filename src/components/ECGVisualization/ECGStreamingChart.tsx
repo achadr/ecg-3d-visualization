@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import uPlot from 'uplot';
 import 'uplot/dist/uPlot.min.css';
+import './ECGStreamingChart.css';
 import type { ECGPoint } from '../../types/ecg';
 import { ECG_CHART_CONFIG } from '../../constants/ecgStreamingConfig';
 
@@ -9,13 +10,15 @@ interface ECGStreamingChartProps {
   isLive?: boolean;
   width?: number;
   height?: number;
+  isDarkTheme?: boolean;
 }
 
 export const ECGStreamingChart: React.FC<ECGStreamingChartProps> = ({
   data,
   isLive = false,
   width = ECG_CHART_CONFIG.WIDTH,
-  height = ECG_CHART_CONFIG.HEIGHT
+  height = ECG_CHART_CONFIG.HEIGHT,
+  isDarkTheme = true
 }) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const plotRef = useRef<uPlot | null>(null);
@@ -23,7 +26,7 @@ export const ECGStreamingChart: React.FC<ECGStreamingChartProps> = ({
   const rafIdRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (!chartRef.current || data.length === 0) return;
+    if (!chartRef.current) return;
 
     // Store pending data
     pendingDataRef.current = data;
@@ -38,9 +41,19 @@ export const ECGStreamingChart: React.FC<ECGStreamingChartProps> = ({
       if (!pendingDataRef.current || !chartRef.current) return;
 
       // Prepare data for uPlot (expects array of arrays)
-      const timestamps = pendingDataRef.current.map(d => d.timestamp);
-      const values = pendingDataRef.current.map(d => d.value);
+      // Show empty chart if no data
+      const timestamps = pendingDataRef.current.length > 0
+        ? pendingDataRef.current.map(d => d.timestamp)
+        : [0];
+      const values = pendingDataRef.current.length > 0
+        ? pendingDataRef.current.map(d => d.value)
+        : [null];
       const uplotData: uPlot.AlignedData = [timestamps, values];
+
+      // Theme colors
+      const lineColor = isDarkTheme ? '#e74c3c' : '#e74c3c';
+      const gridColor = isDarkTheme ? '#2a1a1a' : '#e0e0e0';
+      const textColor = isDarkTheme ? '#e74c3c' : '#333333';
 
       const opts: uPlot.Options = {
         width,
@@ -53,7 +66,7 @@ export const ECGStreamingChart: React.FC<ECGStreamingChartProps> = ({
           { label: "Time (s)" },
           {
             label: "ECG (mV)",
-            stroke: ECG_CHART_CONFIG.LINE_COLOR,
+            stroke: lineColor,
             width: ECG_CHART_CONFIG.LINE_WIDTH,
             spanGaps: false,
           }
@@ -69,16 +82,22 @@ export const ECGStreamingChart: React.FC<ECGStreamingChartProps> = ({
         },
         axes: [
           {
-            grid: { show: true, stroke: "#e0e0e0", width: 1 },
-            ticks: { show: true },
+            grid: { show: true, stroke: gridColor, width: 1 },
+            ticks: { show: !isLive, size: 5, stroke: textColor },
             label: "Time (s)",
-            labelSize: 30,
+            labelSize: 20,
+            font: "10px Arial",
+            stroke: textColor,
+            values: isLive ? () => [] : undefined, // Hide time tick values when live (they move)
           },
           {
-            grid: { show: true, stroke: "#e0e0e0", width: 1 },
-            ticks: { show: true },
+            grid: { show: true, stroke: gridColor, width: 1 },
+            ticks: { show: true, size: 5, stroke: textColor },
             label: "Voltage (mV)",
-            labelSize: 30,
+            labelSize: 20,
+            font: "10px Arial",
+            stroke: textColor,
+            // Keep voltage values visible always
           }
         ],
       };
@@ -103,24 +122,30 @@ export const ECGStreamingChart: React.FC<ECGStreamingChartProps> = ({
         plotRef.current = null;
       }
     };
-  }, [data, width, height]);
+  }, [data, width, height, isLive, isDarkTheme]);
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div
+      style={{ position: 'relative' }}
+      className={isDarkTheme ? 'ecg-chart-dark' : 'ecg-chart-light'}
+    >
       <div ref={chartRef} />
       {isLive && (
         <div style={{
           position: 'absolute',
-          top: '-10px',
-          right: '10px',
+          top: '2px',
+          right: '5px',
           background: '#e74c3c',
           color: 'white',
-          padding: '5px 10px',
-          borderRadius: '4px',
-          fontSize: '12px',
-          fontWeight: 'bold'
+          padding: '3px 8px',
+          borderRadius: '3px',
+          fontSize: '10px',
+          fontWeight: 'bold',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '4px'
         }}>
-          🔴 LIVE
+          <span style={{ fontSize: '8px' }}>●</span> LIVE
         </div>
       )}
     </div>

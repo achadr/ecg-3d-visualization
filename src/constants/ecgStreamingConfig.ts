@@ -17,9 +17,11 @@ export const ECG_STREAMING_CONFIG = {
 } as const;
 
 export const ECG_CHART_CONFIG = {
-  WIDTH: 1400,
-  HEIGHT: 400,
-  LINE_COLOR: '#e74c3c',
+  WIDTH: 610,
+  HEIGHT: 200,
+  LINE_COLOR: '#00ff00', // Bright green like real ECG monitors
   LINE_WIDTH: 2,
   VOLTAGE_RANGE: [-2, 2] as [number, number], // mV
+  BACKGROUND_COLOR: '#000000',
+  GRID_COLOR: '#1a3d1a', // Dark green grid
 } as const;

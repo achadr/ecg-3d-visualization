@@ -1,0 +1,41 @@
+/* ECG Chart Legend Styles - Dark Theme */
+.ecg-chart-dark .u-legend {
+  color: #e74c3c !important;
+}
+
+.ecg-chart-dark .u-legend .u-series {
+  color: #e74c3c !important;
+}
+
+.ecg-chart-dark .u-legend .u-series th {
+  color: #e74c3c !important;
+}
+
+.ecg-chart-dark .u-legend .u-series td {
+  color: #e74c3c !important;
+}
+
+.ecg-chart-dark .u-legend .u-marker {
+  background: #e74c3c !important;
+}
+
+/* ECG Chart Legend Styles - Light Theme */
+.ecg-chart-light .u-legend {
+  color: #333333 !important;
+}
+
+.ecg-chart-light .u-legend .u-series {
+  color: #333333 !important;
+}
+
+.ecg-chart-light .u-legend .u-series th {
+  color: #333333 !important;
+}
+
+.ecg-chart-light .u-legend .u-series td {
+  color: #333333 !important;
+}
+
+.ecg-chart-light .u-legend .u-marker {
+  background: #e74c3c !important;
+}

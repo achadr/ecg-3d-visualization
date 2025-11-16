@@ -41,8 +41,6 @@ export const generateECGData = (
 
     // QRS complex (ventricular depolarization) - sharp spike around 0.2
     if (beatPhase >= 0.16 && beatPhase < 0.24) {
-      const qrsTime = (beatPhase - 0.2) / 0.04;
-
       // Q wave (small negative)
       if (beatPhase < 0.19) {
         ecgValue -= 0.1 * Math.exp(-((beatPhase - 0.18) ** 2) / 0.0001);
