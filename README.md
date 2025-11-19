@@ -317,3 +317,195 @@ Toute la logique métier est testée :
 
 
 
+## Visualisation ECG en Temps Réel
+
+![ECG Signal Display](src/docs/screenshots/ECG_signal_screen.png)
+
+### Contexte
+
+Lors de la restitution, une question pertinente a été soulevée concernant l'affichage des signaux ECG : comment gérer efficacement de grandes séries temporelles sachant que les bibliothèques classiques comme Recharts et D3.js ne sont pas conçues pour ce cas d'usage.
+
+Cette implémentation répond à cette problématique en utilisant uPlot, une bibliothèque spécialisée dans le monitoring haute performance de séries temporelles.
+
+## Architecture
+
+### Stack Technique
+
+- uPlot - Bibliothèque de graphiques haute performance
+- React
+
+### Structure des Composants
+
+```
+src/
+├── components/ECGVisualization/
+│   ├── ECGDisplay.tsx              Conteneur principal avec layout
+│   ├── ECGStreamControls.tsx       Contrôles et indicateurs de statut
+│   ├── ECGStreamingChart.tsx       Wrapper uPlot avec optimisations
+│   └── ECGStreamingChart.css       Styles pour la légende
+├── hooks/
+│   └── useECGStreamingSimulator.ts Hook de gestion du streaming
+├── utils/
+│   └── ecgGenerator.ts             Générateur de signaux synthétiques
+├── constants/
+│   └── ecgStreamingConfig.ts       Configuration centralisée
+└── types/
+    └── ecg.ts                      Définitions TypeScript
+```
+
+## uPlot : Choix Technique
+
+### Pourquoi uPlot
+
+uPlot est une bibliothèque optimisée pour le rendu de grandes séries temporelles. Contrairement à Recharts ou D3.js :
+
+- Rendu Canvas ultra-performant
+- Conçu pour le streaming de données en temps réel
+- Empreinte mémoire minimale
+- Mise à jour incrémentale efficace
+- Support natif des milliers de points
+
+### Performances
+
+- Rendu fluide
+- Gestion de 500 Hz (500 points/seconde) configurable
+- Buffer optimisé de 1000 points en mémoire qui dépend de durée max du buffer et la fréquence d'échantillonnage
+- Mise à jour toutes les 100ms
+
+## Flux de Données
+
+![Flux de Données ECG](src/docs/screenshots/ECG_data_flow.png)
+
+### Génération des Données
+
+Le générateur ECG est basé sur un script que j'ai trouvé sur l'internet. Il produit des signaux synthétiques réalistes :
+
+- Ondes P-QRS-T physiologiquement
+- Fréquence cardiaque configurable (60 BPM par défaut)
+- Taux d'échantillonnage configurable (500Hz par défaut)
+
+```typescript
+const ecgDataset = generateECGData(
+  300,  // 5 minutes de données
+  500,  // 500 Hz
+  60    // 60 BPM
+);
+```
+
+### Stockage des Données
+
+**Génération unique au démarrage**
+
+Les données sont générées une seule fois et stockées en RAM via useMemo :
+
+- 150 000 points correspondant à une session de 5 minutes à 500 Hz
+- Environ 2.4 MB en mémoire
+- Persistant pendant toute la session
+- Régénéré uniquement au rafraîchissement de la page
+
+**Cycle de vie**
+
+```
+Démarrage 
+      ↓
+useMemo génère dataset 
+      ↓
+Stocké en RAM
+      ↓
+Simulation streaming lit depuis RAM
+      ↓
+Buffer circulaire maintient fenêtre 2s
+      ↓
+Affichage temps réel
+```
+
+### Simulation du Streaming
+
+Le hook useECGStreamingSimulator simule l'arrivée de données en temps réel :
+
+**Pattern Ring Buffer**
+
+- Taille fixe (configurable) : 1000 points (2 secondes à 500 Hz)
+- Suppression automatique des points les plus anciens
+- Pas de croissance mémoire incontrôlée
+
+**Livraison par batch**
+
+- Intervalle : 100 ms
+- Taille : 50 points par batch
+- Résultat : 500 points/seconde (500 Hz)
+- Progression : 0-100% du dataset (session de 5min générée par ecgGenerator.ts)
+
+```typescript
+const {
+  buffer,           // 1000 derniers points
+  isStreaming,      // État actuel
+  progress,         // 0-100%
+  startStreaming,   // Démarrer
+  stopStreaming,    // Pause
+  resetStream       // Recommencer
+} = useECGStreamingSimulator(ecgDataset, config);
+```
+
+## Configuration Actuelle
+
+### Paramètres de Streaming
+
+```typescript
+const SAMPLING_RATE = 500;              // Hz
+const BATCH_INTERVAL = 100;             // ms
+const BUFFER_MAX_DURATION = 2;          // secondes
+
+// Auto-calculés
+BATCH_SIZE: 50 points                   // (500 * 100) / 1000
+BUFFER_MAX_SIZE: 1000 points            // 2s * 500Hz
+```
+
+
+## Installation et Setup
+
+Cette implémentation ECG est une addition au projet existant de visualisation 3D cardiaque.
+
+
+### Installation
+
+**Si vous clonez le projet pour la première fois :**
+
+```bash
+# Cloner le repository
+git clone [URL_DU_REPO]
+cd front-end-candidat-achadr
+
+# Installer les dépendances
+npm install
+
+# Lancer le serveur de développement
+npm run dev
+```
+
+**Si vous avez déjà le repository :**
+
+```bash
+# Se placer dans le dossier du projet
+cd front-end-candidat-achadr
+
+# Récupérer les dernières modifications
+git pull
+
+# Installer/mettre à jour les dépendances
+npm install
+
+# Lancer le serveur de développement
+npm run dev
+```
+
+L'application sera disponible sur http://localhost:5173
+
+### Vérifier l'implémentation ECG
+
+Une fois l'application lancée :
+1. Le moniteur ECG apparaît en haut au centre de l'écran
+2. Cliquer sur "Start" pour démarrer le streaming
+3. Utiliser les contrôles pour Pause/Reset
+4. Basculer entre thème sombre/clair avec le bouton soleil/lune
+
