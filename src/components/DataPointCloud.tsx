@@ -3,7 +3,9 @@ import type { ElectrophysiologyPoint } from '../types/electrophysiology'
 import { generateElectrophysiologyPoint, getIndicatorColorFromIndex } from '../utils/dataGenerator'
 import useDataStream from '../hooks/useDataStream'
 import DataPoint from './DataPoint'
+import LivePointsInstanced from './LivePointsInstanced'
 import {
+  LIVE_POINTS_COUNT,
   DEFAULT_POINT_SCALE,
   LIVE_POINT_OPACITY,
   SELECTED_POINT_SCALE,
@@ -34,7 +36,8 @@ interface DataPointCloudProps {
 /**
  * DataPointCloud Component
  * Manages the data stream and renders all active data points
- * Optimized with memoization for better performance
+ * Live points share one InstancedMesh; hovered, selected and pinned points
+ * (a handful at most) keep their own DataPoint mesh
  *
  * Uses useDataStream hook to separate data logic from rendering
  * Automatically starts streaming on mount
@@ -64,20 +67,6 @@ function DataPointCloud({ onSelectPoint, onHoverPoint, selectedPoint = null, hov
       return !pinnedPoints.some((pinned) => pinned.id === point.id)
     })
   }, [livePoints, selectedPoint, hoveredPoint, pinnedPoints])
-
-  // Memoize rendered live points to avoid unnecessary recalculations
-  const renderedPoints = useMemo(() => {
-    return filteredLivePoints.map((point) => (
-      <DataPoint
-        key={`${point.id}-${point.timestamp}`}
-        point={point}
-        scale={DEFAULT_POINT_SCALE}
-        opacity={LIVE_POINT_OPACITY}
-        onSelect={onSelectPoint}
-        onHover={onHoverPoint}
-      />
-    ))
-  }, [filteredLivePoints, onSelectPoint, onHoverPoint])
 
   // Render hovered point separately (frozen while hovering)
   const renderedHoveredPoint = useMemo(() => {
@@ -143,7 +132,16 @@ function DataPointCloud({ onSelectPoint, onHoverPoint, selectedPoint = null, hov
 
   return (
     <group>
-      {renderedPoints}
+      {/* All live points in a single InstancedMesh (one draw call, nothing remounted per batch) */}
+      <LivePointsInstanced
+        points={filteredLivePoints}
+        batch={livePoints}
+        capacity={LIVE_POINTS_COUNT}
+        scale={DEFAULT_POINT_SCALE}
+        opacity={LIVE_POINT_OPACITY}
+        onSelect={onSelectPoint}
+        onHover={onHoverPoint}
+      />
       {renderedHoveredPoint}
       {renderedSelectedPoint}
       {renderedPinnedPoints}

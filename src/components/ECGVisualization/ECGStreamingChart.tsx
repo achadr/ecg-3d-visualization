@@ -13,6 +13,67 @@ interface ECGStreamingChartProps {
   isDarkTheme?: boolean;
 }
 
+/** Converts the buffer into the column format uPlot expects ([x values, y values]). */
+function toAlignedData(points: ECGPoint[]): uPlot.AlignedData {
+  // Show an empty chart when there is no data yet
+  if (points.length === 0) return [[0], [null]];
+  return [points.map(d => d.timestamp), points.map(d => d.value)];
+}
+
+function buildOptions(width: number, height: number, isLive: boolean, isDarkTheme: boolean): uPlot.Options {
+  // Theme colors
+  const lineColor = '#e74c3c';
+  const gridColor = isDarkTheme ? '#2a1a1a' : '#e0e0e0';
+  const textColor = isDarkTheme ? '#e74c3c' : '#333333';
+
+  return {
+    width,
+    height,
+    cursor: {
+      drag: { x: false, y: false },
+      points: { show: false }
+    },
+    series: [
+      { label: "Time (s)" },
+      {
+        label: "ECG (mV)",
+        stroke: lineColor,
+        width: ECG_CHART_CONFIG.LINE_WIDTH,
+        spanGaps: false,
+      }
+    ],
+    scales: {
+      x: {
+        time: false,
+      },
+      y: {
+        auto: false,
+        range: ECG_CHART_CONFIG.VOLTAGE_RANGE,
+      }
+    },
+    axes: [
+      {
+        grid: { show: true, stroke: gridColor, width: 1 },
+        ticks: { show: !isLive, size: 5, stroke: textColor },
+        label: "Time (s)",
+        labelSize: 20,
+        font: "10px Arial",
+        stroke: textColor,
+        values: isLive ? () => [] : undefined, // Hide time tick values when live (they move)
+      },
+      {
+        grid: { show: true, stroke: gridColor, width: 1 },
+        ticks: { show: true, size: 5, stroke: textColor },
+        label: "Voltage (mV)",
+        labelSize: 20,
+        font: "10px Arial",
+        stroke: textColor,
+        // Keep voltage values visible always
+      }
+    ],
+  };
+}
+
 export const ECGStreamingChart: React.FC<ECGStreamingChartProps> = ({
   data,
   isLive = false,
@@ -22,107 +83,49 @@ export const ECGStreamingChart: React.FC<ECGStreamingChartProps> = ({
 }) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const plotRef = useRef<uPlot | null>(null);
-  const pendingDataRef = useRef<ECGPoint[] | null>(null);
+  const dataRef = useRef<ECGPoint[]>(data);
   const rafIdRef = useRef<number | null>(null);
 
+  // Create the chart once, and again only when its options change (size, theme, live mode).
+  // New samples do NOT recreate it: they go through setData below, which is what makes uPlot fast.
   useEffect(() => {
     if (!chartRef.current) return;
 
-    // Store pending data
-    pendingDataRef.current = data;
-
-    // Cancel any pending animation frame
-    if (rafIdRef.current !== null) {
-      cancelAnimationFrame(rafIdRef.current);
-    }
-
-    // Schedule update on next animation frame (synced with browser refresh ~60 FPS)
-    rafIdRef.current = requestAnimationFrame(() => {
-      if (!pendingDataRef.current || !chartRef.current) return;
-
-      // Prepare data for uPlot (expects array of arrays)
-      // Show empty chart if no data
-      const timestamps = pendingDataRef.current.length > 0
-        ? pendingDataRef.current.map(d => d.timestamp)
-        : [0];
-      const values = pendingDataRef.current.length > 0
-        ? pendingDataRef.current.map(d => d.value)
-        : [null];
-      const uplotData: uPlot.AlignedData = [timestamps, values];
-
-      // Theme colors
-      const lineColor = isDarkTheme ? '#e74c3c' : '#e74c3c';
-      const gridColor = isDarkTheme ? '#2a1a1a' : '#e0e0e0';
-      const textColor = isDarkTheme ? '#e74c3c' : '#333333';
-
-      const opts: uPlot.Options = {
-        width,
-        height,
-        cursor: {
-          drag: { x: false, y: false },
-          points: { show: false }
-        },
-        series: [
-          { label: "Time (s)" },
-          {
-            label: "ECG (mV)",
-            stroke: lineColor,
-            width: ECG_CHART_CONFIG.LINE_WIDTH,
-            spanGaps: false,
-          }
-        ],
-        scales: {
-          x: {
-            time: false,
-          },
-          y: {
-            auto: false,
-            range: ECG_CHART_CONFIG.VOLTAGE_RANGE,
-          }
-        },
-        axes: [
-          {
-            grid: { show: true, stroke: gridColor, width: 1 },
-            ticks: { show: !isLive, size: 5, stroke: textColor },
-            label: "Time (s)",
-            labelSize: 20,
-            font: "10px Arial",
-            stroke: textColor,
-            values: isLive ? () => [] : undefined, // Hide time tick values when live (they move)
-          },
-          {
-            grid: { show: true, stroke: gridColor, width: 1 },
-            ticks: { show: true, size: 5, stroke: textColor },
-            label: "Voltage (mV)",
-            labelSize: 20,
-            font: "10px Arial",
-            stroke: textColor,
-            // Keep voltage values visible always
-          }
-        ],
-      };
-
-      if (plotRef.current) {
-        // Update existing plot
-        plotRef.current.setData(uplotData);
-        plotRef.current.setSize({ width, height });
-      } else {
-        // Create new plot
-        plotRef.current = new uPlot(opts, uplotData, chartRef.current);
-      }
-    });
+    const plot = new uPlot(
+      buildOptions(width, height, isLive, isDarkTheme),
+      toAlignedData(dataRef.current),
+      chartRef.current
+    );
+    plotRef.current = plot;
 
     return () => {
-      // Cleanup on unmount
+      plot.destroy();
+      plotRef.current = null;
+    };
+  }, [width, height, isLive, isDarkTheme]);
+
+  // Push new samples into the existing chart, at most once per animation frame (~60 FPS).
+  useEffect(() => {
+    dataRef.current = data;
+
+    // An update is already scheduled: it will read the latest data when it runs
+    if (rafIdRef.current !== null) return;
+
+    rafIdRef.current = requestAnimationFrame(() => {
+      rafIdRef.current = null;
+      plotRef.current?.setData(toAlignedData(dataRef.current));
+    });
+  }, [data]);
+
+  // Cancel a pending update on unmount
+  useEffect(() => {
+    return () => {
       if (rafIdRef.current !== null) {
         cancelAnimationFrame(rafIdRef.current);
-      }
-      if (plotRef.current) {
-        plotRef.current.destroy();
-        plotRef.current = null;
+        rafIdRef.current = null;
       }
     };
-  }, [data, width, height, isLive, isDarkTheme]);
+  }, []);
 
   return (
     <div
