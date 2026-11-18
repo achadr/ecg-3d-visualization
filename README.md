@@ -1,3 +1,7 @@
+# ECG & 3D Electrophysiology Visualization
+
+Prototype React de visualisation médicale : un nuage de points d'électrophysiologie en 3D (Three.js, React Three Fiber), alimenté par un flux de données simulé en temps réel, avec sélection, survol et épinglage des points, et un moniteur ECG temps réel à 500 Hz (uPlot).
+
 ## Technologies
 
 ### Stack Principal
@@ -323,7 +327,7 @@ Toute la logique métier est testée :
 
 ### Contexte
 
-Lors de la restitution, une question pertinente a été soulevée concernant l'affichage des signaux ECG : comment gérer efficacement de grandes séries temporelles sachant que les bibliothèques classiques comme Recharts et D3.js ne sont pas conçues pour ce cas d'usage.
+Afficher des signaux ECG en temps réel pose une question précise : comment gérer efficacement de grandes séries temporelles, sachant que les bibliothèques classiques comme Recharts et D3.js ne sont pas conçues pour ce cas d'usage.
 
 Cette implémentation répond à cette problématique en utilisant uPlot, une bibliothèque spécialisée dans le monitoring haute performance de séries temporelles.
 
